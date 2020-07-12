@@ -39,6 +39,19 @@ MUL = {
     LIM_VOLT: 100.,
 }
 
+KEY_CMDS = {
+    'is_on': ISON,
+    'voltage': VOLTAGE,
+    'current': CURRENT,
+    'time': TIME,
+    'cap_ah': CAP_AH,
+    'cap_wh': CAP_WH,
+    'temp': TEMP,
+    'set_current': LIM_CURR,
+    'set_voltage': LIM_VOLT,
+    'set_timer': TIMER,
+}
+
 
 class PX100:
     def __init__(self, device):
@@ -46,6 +59,18 @@ class PX100:
         self.device = device
         self.name = "PX100"
         self.device.timeout = 1000
+        self.data = {
+            'is_on': 0.,
+            'voltage': 0.,
+            'current': 0.,
+            'time': tm(0),
+            'cap_ah': 0.,
+            'cap_wh': 0.,
+            'temp': 0,
+            'set_current': 0.,
+            'set_voltage': 0.,
+            'set_timer': tm(0),
+        }
 
     def probe(self):
         print("probe")
@@ -55,24 +80,17 @@ class PX100:
             return False
 
     def columns(self):
-        [
-            'time', 'voltage', 'current', 'is_on', 'cap_ah', 'cap_wh', 'temp',
-            'set_current', 'set_voltage', 'set_timer'
-        ]
+        self.data.keys()
 
     def readAll(self):
-        return {
-            'is_on': self.getVal(ISON),
-            'voltage': self.getVal(VOLTAGE),
-            'current': self.getVal(CURRENT),
-            'time': self.getVal(TIME),
-            'cap_ah': self.getVal(CAP_AH),
-            'cap_wh': self.getVal(CAP_WH),
-            'temp': self.getVal(TEMP),
-            'set_current': self.getVal(LIM_CURR),
-            'set_voltage': self.getVal(LIM_VOLT),
-            'set_timer': self.getVal(TIMER),
-        }
+        for key in self.data.keys():
+            self.updateVal(key)
+        return self.data
+
+    def updateVal(self, key):
+        value = self.getVal(KEY_CMDS[key])
+        if (value != False):
+            self.data[key] = value
 
     def getVal(self, command):
         ret = self.writeFunction(command, [0, 0])
@@ -82,9 +100,10 @@ class PX100:
         elif (len(ret) == 1 and ret[0] == 0x6F):
             print("setval")
             return False
-        elif (len(ret) < 7 or ret[0] != 0xCA or ret[1] != 0xCB or ret[5] != 0xCE
-              or ret[6] != 0xCF):
+        elif (len(ret) < 7 or ret[0] != 0xCA or ret[1] != 0xCB
+              or ret[5] != 0xCE or ret[6] != 0xCF):
             print("Receive error")
+            return False
 
         try:
             mult = MUL[command]
