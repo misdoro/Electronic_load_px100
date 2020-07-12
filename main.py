@@ -11,10 +11,9 @@ class Main:
         self.instr = instruments.instr()
         self.datastore = DataStore(self.instr.columns())
         self.datastore.append(self.instr.readAll())
-        GUI(self.datastore.data, self.callback)
+        GUI(self)
 
     def callback(self):
-        print("callback")
         self.datastore.append(self.instr.readAll())
         return self.datastore.data
 

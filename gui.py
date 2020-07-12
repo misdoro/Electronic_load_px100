@@ -61,10 +61,18 @@ class MainWindow(QtWidgets.QMainWindow):
                   secondary_y='current')
         self.canvas.draw()
 
+    def set_backend(self, backend):
+        self.backend = backend
+
+    def closeEvent(self, event):
+        self.backend.datastore.write('./tmp/')
+        event.accept()
+
 
 class GUI:
-    def __init__(self, data, callback):
+    def __init__(self, backend):
         app = QtWidgets.QApplication(sys.argv)
         self.window = MainWindow()
-        self.window.plot(data, callback)
+        self.window.set_backend(backend)
+        self.window.plot(backend.datastore.data, backend.callback)
         app.exec_()
