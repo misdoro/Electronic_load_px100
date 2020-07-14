@@ -11,9 +11,9 @@ from matplotlib.figure import Figure
 
 class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
-        super(MplCanvas, self).__init__(fig)
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = self.fig.add_subplot(111)
+        super(MplCanvas, self).__init__(self.fig)
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -31,12 +31,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def plot(self, data, callback):
 
         self.callback = callback
-        # plot the pandas DataFrame, passing in the
-        # matplotlib Canvas axes.
-        plt = data.plot(ax=self.canvas.axes,
-                        x='time',
-                        y='voltage',
-                        secondary_y='current')
+        self.ax = self.canvas.axes
+        self.twinax = self.ax.twinx()
+        self.update_plot()
 
         toolbar = NavigationToolbar(self.canvas, self)
 
@@ -51,14 +48,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
 
     def update_plot(self):
-        print("update")
         data = self.callback()
 
-        self.canvas.axes.cla()
-        data.plot(ax=self.canvas.axes,
-                  x='time',
-                  y='voltage',
-                  secondary_y='current')
+        self.ax.cla()
+        self.twinax.cla()
+        data.plot(ax=self.ax, x='time', y=['voltage'])
+        self.ax.legend(loc='lower left')
+        self.ax.set_ylabel('Voltage, V')
+        data.plot(ax=self.twinax, x='time', y=['current'], style='g')
+        self.twinax.legend(loc='lower right')
+        self.twinax.set_ylabel('Current, A')
         self.canvas.draw()
 
     def set_backend(self, backend):
