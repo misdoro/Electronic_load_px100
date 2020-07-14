@@ -89,7 +89,7 @@ class PX100:
 
     def updateVal(self, key):
         value = self.getVal(KEY_CMDS[key])
-        if (value != False):
+        if (value is not False):
             self.data[key] = value
 
     def getVal(self, command):
