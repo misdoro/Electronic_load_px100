@@ -53,10 +53,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ax.cla()
         self.twinax.cla()
         data.plot(ax=self.ax, x='time', y=['voltage'])
-        self.ax.legend(loc='lower left')
+        self.ax.legend(loc='center left')
         self.ax.set_ylabel('Voltage, V')
-        data.plot(ax=self.twinax, x='time', y=['current'], style='g')
-        self.twinax.legend(loc='lower right')
+        data.plot(ax=self.twinax, x='time', y=['current'], style='r')
+        self.twinax.legend(loc='center right')
         self.twinax.set_ylabel('Current, A')
         self.canvas.draw()
 
