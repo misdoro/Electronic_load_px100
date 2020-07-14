@@ -20,7 +20,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
 
-        self.canvas = MplCanvas(self, width=5, height=4, dpi=100)
+        self.canvas = MplCanvas(self, width=7, height=4, dpi=100)
 
         # Setup a timer to trigger the redraw by calling update_plot.
         self.timer = QtCore.QTimer()
