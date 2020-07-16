@@ -21,6 +21,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__(*args, **kwargs)
 
         self.canvas = MplCanvas(self, width=7, height=4, dpi=100)
+        self.setWindowTitle("Battery tester")
 
         # Setup a timer to trigger the redraw by calling update_plot.
         self.timer = QtCore.QTimer()
@@ -49,15 +50,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def update_plot(self):
         data = self.callback()
+        lastrow = data.tail(1)
+        set_voltage = lastrow['set_voltage'].to_list()[0]
 
         self.ax.cla()
         self.twinax.cla()
         data.plot(ax=self.ax, x='time', y=['voltage'])
         self.ax.legend(loc='center left')
         self.ax.set_ylabel('Voltage, V')
+        self.ax.set_ylim(bottom=set_voltage)
         data.plot(ax=self.twinax, x='time', y=['current'], style='r')
         self.twinax.legend(loc='center right')
         self.twinax.set_ylabel('Current, A')
+        self.twinax.set_ylim(0, 10)
         self.canvas.draw()
 
     def set_backend(self, backend):
