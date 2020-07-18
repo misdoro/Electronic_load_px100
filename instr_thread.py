@@ -35,6 +35,7 @@ class InstrumentWorker(QRunnable):
                 self.handle_command(self.commands.pop(0))
             if self.running:
                 self.signals.data_row.emit(self.instr.readAll())
+            time.sleep(.5)
 
         self.instr.close()
 
