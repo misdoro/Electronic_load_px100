@@ -1,21 +1,28 @@
-from instruments import Instruments
+from instr_thread import InstrumentWorker
 from data_store import DataStore
 from gui import GUI
-
-import time
+from PyQt5.QtCore import QThreadPool
 
 
 class Main:
     def __init__(self):
-        instruments = Instruments()
-        self.instr = instruments.instr()
-        self.datastore = DataStore(self.instr.columns())
-        self.datastore.append(self.instr.readAll())
+        self.threadpool = QThreadPool()
+        self.instr_thread()
+        self.datastore = DataStore()
         GUI(self)
 
-    def callback(self):
-        self.datastore.append(self.instr.readAll())
-        return self.datastore.data
+    def instr_thread(self):
+        self.instr_worker = InstrumentWorker()
+        self.instr_worker.signals.data_row.connect(self.data_callback)
+        self.threadpool.start(self.instr_worker)
+        self.instr_worker.signals.start.emit()
+
+    def data_callback(self, data):
+        self.datastore.append(data)
+
+    def at_exit(self):
+        self.instr_worker.signals.exit.emit()
+        self.datastore.write('./tmp/')
 
 
 if __name__ == "__main__":

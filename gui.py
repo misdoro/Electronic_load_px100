@@ -7,6 +7,7 @@ from PyQt5 import QtCore, QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
 
 from matplotlib.figure import Figure
+from datetime import time as tm
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -25,13 +26,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Setup a timer to trigger the redraw by calling update_plot.
         self.timer = QtCore.QTimer()
-        self.timer.setInterval(500)
+        self.timer.setInterval(1000)
         self.timer.timeout.connect(self.update_plot)
         self.timer.start()
 
-    def plot(self, data, callback):
-
-        self.callback = callback
+    def plot(self, data):
         self.ax = self.canvas.axes
         self.twinax = self.ax.twinx()
         self.update_plot()
@@ -49,27 +48,31 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
 
     def update_plot(self):
-        data = self.callback()
-        lastrow = data.tail(1)
-        set_voltage = lastrow['set_voltage'].to_list()[0]
+        print("update_plot")
+        data = self.backend.datastore.data
+        if len(data) > 0:
+            lastrow = data.tail(1)
+            set_voltage = lastrow['set_voltage'].to_list()[0]
+            time = lastrow['time'].to_list()[0]
 
-        self.ax.cla()
-        self.twinax.cla()
-        data.plot(ax=self.ax, x='time', y=['voltage'])
-        self.ax.legend(loc='center left')
-        self.ax.set_ylabel('Voltage, V')
-        self.ax.set_ylim(bottom=set_voltage)
-        data.plot(ax=self.twinax, x='time', y=['current'], style='r')
-        self.twinax.legend(loc='center right')
-        self.twinax.set_ylabel('Current, A')
-        self.twinax.set_ylim(0, 10)
-        self.canvas.draw()
+            if time != tm(0):
+                self.ax.cla()
+                self.twinax.cla()
+                data.plot(ax=self.ax, x='time', y=['voltage'])
+                self.ax.legend(loc='center left')
+                self.ax.set_ylabel('Voltage, V')
+                self.ax.set_ylim(bottom=set_voltage)
+                data.plot(ax=self.twinax, x='time', y=['current'], style='r')
+                self.twinax.legend(loc='center right')
+                self.twinax.set_ylabel('Current, A')
+                self.twinax.set_ylim(0, 10)
+                self.canvas.draw()
 
     def set_backend(self, backend):
         self.backend = backend
 
     def closeEvent(self, event):
-        self.backend.datastore.write('./tmp/')
+        self.backend.at_exit()
         event.accept()
 
 
@@ -78,5 +81,5 @@ class GUI:
         app = QtWidgets.QApplication(sys.argv)
         self.window = MainWindow()
         self.window.set_backend(backend)
-        self.window.plot(backend.datastore.data, backend.callback)
+        self.window.plot(backend.datastore.data)
         app.exec_()

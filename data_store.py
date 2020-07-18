@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class DataStore:
-    def __init__(self, col):
+    def __init__(self):
         self.data = DataFrame(columns=['time', 'current', 'voltage'])
 
     def reset(self):
