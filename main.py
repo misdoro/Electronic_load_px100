@@ -25,6 +25,7 @@ class Main:
 
     def at_exit(self):
         self.instr_worker.signals.exit.emit()
+        self.threadpool.waitForDone()
         self.datastore.write('./tmp/')
 
 
