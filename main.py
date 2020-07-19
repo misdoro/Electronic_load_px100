@@ -20,6 +20,9 @@ class Main:
     def data_callback(self, data):
         self.datastore.append(data)
 
+    def send_command(self, command):
+        self.instr_worker.signals.command.emit(command)
+
     def at_exit(self):
         self.instr_worker.signals.exit.emit()
         self.datastore.write('./tmp/')

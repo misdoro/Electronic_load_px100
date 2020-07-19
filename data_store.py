@@ -4,7 +4,7 @@ from datetime import datetime
 
 class DataStore:
     def __init__(self):
-        self.data = DataFrame(columns=['time', 'current', 'voltage'])
+        self.data = DataFrame()
 
     def reset(self):
         self.data = self.data.drop()

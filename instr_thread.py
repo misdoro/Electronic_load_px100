@@ -40,8 +40,8 @@ class InstrumentWorker(QRunnable):
         self.instr.close()
 
     def handle_command(self, command):
-        print("handle_command")
-        print(command)
+        for k, v in command.items():
+            self.instr.command(k, v)
 
     def handle_start(self):
         self.running = True

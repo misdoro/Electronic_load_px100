@@ -4,10 +4,25 @@ matplotlib.use('Qt5Agg')
 
 from PyQt5 import QtCore, QtWidgets
 
+from PyQt5.QtCore import (
+    Qt, )
+
+from PyQt5.QtWidgets import (
+    QWidget,
+    QCheckBox,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+)
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
 
 from matplotlib.figure import Figure
 from datetime import time as tm
+
+from instruments.instrument import Instrument
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -21,8 +36,17 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
 
-        self.canvas = MplCanvas(self, width=7, height=4, dpi=100)
         self.setWindowTitle("Battery tester")
+        self.resize(1024, 600)
+
+        main_layout = QHBoxLayout()
+        main_layout.addLayout(self.plot_layout())
+        main_layout.addLayout(self.controls_layout())
+
+        widget = QWidget()
+        widget.setLayout(main_layout)
+        self.setCentralWidget(widget)
+        self.show()
 
         # Setup a timer to trigger the redraw by calling update_plot.
         self.timer = QtCore.QTimer()
@@ -30,30 +54,63 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timer.timeout.connect(self.update_plot)
         self.timer.start()
 
-    def plot(self, data):
+    def plot_layout(self):
+        self.canvas = MplCanvas(self, width=8, height=4, dpi=100)
         self.ax = self.canvas.axes
         self.twinax = self.ax.twinx()
-        self.update_plot()
 
         toolbar = NavigationToolbar(self.canvas, self)
-
-        layout = QtWidgets.QVBoxLayout()
+        layout = QVBoxLayout()
         layout.addWidget(toolbar)
         layout.addWidget(self.canvas)
+        return layout
 
-        # Create a placeholder widget to hold our toolbar and canvas.
-        widget = QtWidgets.QWidget()
-        widget.setLayout(layout)
-        self.setCentralWidget(widget)
-        self.show()
+    def controls_layout(self):
+        layout = QVBoxLayout()
+
+        self.en_checkbox = QCheckBox("Enabled")
+        layout.addWidget(self.en_checkbox)
+
+        self.set_v = QLineEdit()
+        self.set_v.setMaxLength(5)
+        self.set_v.returnPressed.connect(self.voltage_set)
+        layout.addLayout(self.__label_for(self.set_v, "Voltage"))
+
+        self.set_curr = QLineEdit()
+        self.set_curr.setMaxLength(5)
+        self.set_curr.returnPressed.connect(self.current_set)
+        layout.addLayout(self.__label_for(self.set_curr, "Current"))
+
+        return layout
+
+    def __label_for(self, control, text):
+        layout = QHBoxLayout()
+        layout.addWidget(QLabel(text))
+        layout.addWidget(control)
+
+        return layout
 
     def update_plot(self):
         print("update_plot")
         data = self.backend.datastore.data
         if len(data) > 0:
             lastrow = data.tail(1)
+
             set_voltage = lastrow['set_voltage'].to_list()[0]
+            if not self.set_v.hasFocus():
+                self.set_v.setText('{:4.2f}'.format(set_voltage))
+
+            set_current = lastrow['set_current'].to_list()[0]
+            if not self.set_curr.hasFocus():
+                self.set_curr.setText('{:4.2f}'.format(set_current))
+
             time = lastrow['time'].to_list()[0]
+
+            is_on = lastrow['is_on'].to_list()[0]
+            if is_on:
+                self.en_checkbox.setCheckState(Qt.Checked)
+            else:
+                self.en_checkbox.setCheckState(Qt.Unchecked)
 
             if time != tm(0):
                 self.ax.cla()
@@ -75,11 +132,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.backend.at_exit()
         event.accept()
 
+    def voltage_set(self):
+        value = float(self.set_v.text())
+        self.set_v.clearFocus()
+        self.backend.send_command({Instrument.COMMAND_SET_VOLTAGE: value})
+
+    def current_set(self):
+        value = float(self.set_curr.text())
+        self.set_curr.clearFocus()
+        self.backend.send_command({Instrument.COMMAND_SET_CURRENT: value})
+
 
 class GUI:
     def __init__(self, backend):
         app = QtWidgets.QApplication(sys.argv)
         self.window = MainWindow()
         self.window.set_backend(backend)
-        self.window.plot(backend.datastore.data)
         app.exec_()
