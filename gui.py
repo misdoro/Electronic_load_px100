@@ -20,7 +20,7 @@ from PyQt5.QtWidgets import (
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
 
 from matplotlib.figure import Figure
-from datetime import time as tm
+from datetime import time
 
 from instruments.instrument import Instrument
 
@@ -97,38 +97,34 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def update_plot(self):
         print("update_plot")
-        data = self.backend.datastore.data
-        if len(data) > 0:
-            lastrow = data.tail(1)
-
-            set_voltage = lastrow['set_voltage'].to_list()[0]
+        data = self.backend.datastore
+        if data:
+            set_voltage = data.lastval('set_voltage')
             if not self.set_v.hasFocus():
                 self.set_v.setText('{:4.2f}'.format(set_voltage))
 
-            set_current = lastrow['set_current'].to_list()[0]
+            set_current = data.lastval('set_current')
             if not self.set_curr.hasFocus():
                 self.set_curr.setText('{:4.2f}'.format(set_current))
 
-            time = lastrow['time'].to_list()[0]
-
-            is_on = lastrow['is_on'].to_list()[0]
+            is_on = data.lastval('is_on')
             if is_on:
                 self.en_checkbox.setCheckState(Qt.Checked)
             else:
                 self.en_checkbox.setCheckState(Qt.Unchecked)
 
-            if time != tm(0):
-                self.ax.cla()
-                self.twinax.cla()
-                data.plot(ax=self.ax, x='time', y=['voltage'])
-                self.ax.legend(loc='center left')
-                self.ax.set_ylabel('Voltage, V')
-                self.ax.set_ylim(bottom=set_voltage)
-                data.plot(ax=self.twinax, x='time', y=['current'], style='r')
-                self.twinax.legend(loc='center right')
-                self.twinax.set_ylabel('Current, A')
-                self.twinax.set_ylim(0, 10)
-                self.canvas.draw()
+            xlim = (time(0), max([time(0, 1, 0), data.lastval('time')]))
+            self.ax.cla()
+            self.twinax.cla()
+            data.plot(ax=self.ax, x='time', y=['voltage'], xlim=xlim)
+            self.ax.legend(loc='center left')
+            self.ax.set_ylabel('Voltage, V')
+            self.ax.set_ylim(bottom=set_voltage)
+            data.plot(ax=self.twinax, x='time', y=['current'], style='r')
+            self.twinax.legend(loc='center right')
+            self.twinax.set_ylabel('Current, A')
+            self.twinax.set_ylim(0, 10)
+            self.canvas.draw()
 
     def set_backend(self, backend):
         self.backend = backend
@@ -156,6 +152,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def reset_dev(self, s):
         self.reset_btn.clearFocus()
+        self.backend.datastore.reset()
         self.backend.send_command({Instrument.COMMAND_RESET: True})
 
 
