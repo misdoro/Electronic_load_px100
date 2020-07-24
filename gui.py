@@ -69,6 +69,7 @@ class MainWindow(QtWidgets.QMainWindow):
         layout = QVBoxLayout()
 
         self.en_checkbox = QCheckBox("Enabled")
+        self.en_checkbox.stateChanged.connect(self.enabled_changed)
         layout.addWidget(self.en_checkbox)
 
         self.set_v = QLineEdit()
@@ -135,6 +136,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def closeEvent(self, event):
         self.backend.at_exit()
         event.accept()
+
+    def enabled_changed(self):
+        value = self.en_checkbox.isChecked()
+        if self.en_checkbox.hasFocus():
+            print("enable", value)
+            self.en_checkbox.clearFocus()
+            self.backend.send_command({Instrument.COMMAND_ENABLE: value})
 
     def voltage_set(self):
         value = float(self.set_v.text())
