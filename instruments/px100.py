@@ -81,6 +81,13 @@ class PX100(Instrument):
         Instrument.COMMAND_RESET: RESETCNT,
     }
 
+    VERIFY_CMD = {
+        Instrument.COMMAND_ENABLE: 'is_on',
+        Instrument.COMMAND_SET_VOLTAGE: 'set_voltage',
+        Instrument.COMMAND_SET_CURRENT: 'set_current',
+        Instrument.COMMAND_SET_TIMER: 'set_timer',
+    }
+
     def __init__(self, device):
         print(device)
         self.device = device
@@ -108,18 +115,23 @@ class PX100(Instrument):
         else:
             return False
 
-    def readAll(self):
+    def readAll(self, read_all_aux=False):
         print("readAll")
-        self.device.clear()
-        for key in PX100.FREQ_VALS:
-            self.updateVal(key)
-        self.updateVal(PX100.AUX_VALS[self.aux_index])
-        self.aux_index += 1
-        if self.aux_index >= len(PX100.AUX_VALS):
-            self.aux_index = 0
+        self.__clear_device()
+        self.update_vals(PX100.FREQ_VALS)
+
+        if read_all_aux:
+            self.update_vals(PX100.AUX_VALS)
+        else:
+            self.update_val(PX100.AUX_VALS[self.__next_aux()])
+
         return self.data
 
-    def updateVal(self, key):
+    def update_vals(self, keys):
+        for key in keys:
+            self.update_val(key)
+
+    def update_val(self, key):
         value = self.getVal(PX100.KEY_CMDS[key])
         if (value is not False):
             self.data[key] = value
@@ -127,6 +139,11 @@ class PX100(Instrument):
     def command(self, command, value):
         if command in (PX100.COMMANDS.keys()):
             self.setVal(PX100.COMMANDS[command], value)
+            time.sleep(0.5)
+        if command in (PX100.VERIFY_CMD.keys()):
+            self.update_val(PX100.VERIFY_CMD[command])
+        elif (command == Instrument.COMMAND_RESET):
+            self.update_vals(PX100.AUX_VALS)
 
     def getVal(self, command):
         ret = self.writeFunction(command, [0, 0])
@@ -158,6 +175,8 @@ class PX100(Instrument):
         if (command == PX100.SETCURR or command == PX100.SETVCUT):
             f, i = math.modf(value)
             value = [int(i), round(f * 100)]
+        elif (command == PX100.OUTPUT and value):
+            value = [0x01, 0x00]
         else:
             value = value.to_bytes(2, byteorder='big')
         ret = self.writeFunction(command, value)
@@ -186,3 +205,13 @@ class PX100(Instrument):
         self.turnOFF()
         time.sleep(.2)
         self.device.close()
+
+    def __clear_device(self):
+        self.device.clear()
+        self.device.read_bytes(self.device.bytes_in_buffer)
+
+    def __next_aux(self):
+        self.aux_index += 1
+        if self.aux_index >= len(PX100.AUX_VALS):
+            self.aux_index = 0
+        return self.aux_index

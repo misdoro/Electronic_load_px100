@@ -81,6 +81,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.set_curr.returnPressed.connect(self.current_set)
         layout.addLayout(self.__label_for(self.set_curr, "Current"))
 
+        self.reset_btn = QPushButton("Reset")
+        self.reset_btn.clicked.connect(self.reset_dev)
+        layout.addWidget(self.reset_btn)
+
         return layout
 
     def __label_for(self, control, text):
@@ -141,6 +145,10 @@ class MainWindow(QtWidgets.QMainWindow):
         value = float(self.set_curr.text())
         self.set_curr.clearFocus()
         self.backend.send_command({Instrument.COMMAND_SET_CURRENT: value})
+
+    def reset_dev(self, s):
+        self.reset_btn.clearFocus()
+        self.backend.send_command({Instrument.COMMAND_RESET: True})
 
 
 class GUI:
