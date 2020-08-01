@@ -3,12 +3,16 @@ from data_store import DataStore
 from gui import GUI
 from PyQt5.QtCore import QThreadPool
 
+import signal, sys
+
 
 class Main:
     def __init__(self):
         self.threadpool = QThreadPool()
         self.instr_thread()
         self.datastore = DataStore()
+        signal.signal(signal.SIGTERM, self.terminate_process)
+        signal.signal(signal.SIGINT, self.terminate_process)
         GUI(self)
 
     def instr_thread(self):
@@ -27,6 +31,10 @@ class Main:
         self.instr_worker.signals.exit.emit()
         self.threadpool.waitForDone()
         self.datastore.write('./tmp/')
+
+    def terminate_process(self, signal, _stack):
+        self.at_exit()
+        sys.exit()
 
 
 if __name__ == "__main__":
