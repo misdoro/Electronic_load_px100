@@ -3,3 +3,5 @@ numpy
 pandas
 pyqt5
 pyvisa
+pyvisa-py
+pyserial
