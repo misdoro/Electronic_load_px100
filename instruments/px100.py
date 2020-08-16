@@ -86,6 +86,7 @@ class PX100(Instrument):
         Instrument.COMMAND_SET_VOLTAGE: 'set_voltage',
         Instrument.COMMAND_SET_CURRENT: 'set_current',
         Instrument.COMMAND_SET_TIMER: 'set_timer',
+        Instrument.COMMAND_RESET: 'cap_ah',
     }
 
     def __init__(self, device):
@@ -137,12 +138,19 @@ class PX100(Instrument):
             self.data[key] = value
 
     def command(self, command, value):
-        if command in (PX100.COMMANDS.keys()):
+        if command not in (PX100.COMMANDS.keys()):
+            return False
+
+        for i in range(0, 3):
             self.setVal(PX100.COMMANDS[command], value)
             time.sleep(0.5)
-        if command in (PX100.VERIFY_CMD.keys()):
             self.update_val(PX100.VERIFY_CMD[command])
-        elif (command == Instrument.COMMAND_RESET):
+            if self.data[PX100.VERIFY_CMD[command]] == value:
+                break
+            print("retry " + command)
+            time.sleep(0.7)
+
+        if (command == Instrument.COMMAND_RESET):
             self.update_vals(PX100.AUX_VALS)
 
     def getVal(self, command):
@@ -172,7 +180,7 @@ class PX100(Instrument):
             return int.from_bytes(ret[2:5], byteorder='big') / mult
 
     def setVal(self, command, value):
-        if (command == PX100.SETCURR or command == PX100.SETVCUT):
+        if isinstance(value, float):
             f, i = math.modf(value)
             value = [int(i), round(f * 100)]
         elif (command == PX100.OUTPUT and value):
@@ -183,8 +191,8 @@ class PX100(Instrument):
         return ret == 0x6F
 
     def writeFunction(self, command, value):
-        self.constructFrame(command, value)
-        self.device.write_raw(bytearray(self.frame))
+        frame = bytearray([0xB1, 0xB2, command, *value, 0xB6])
+        self.device.write_raw(frame)
         if command >= 0x10:
             resp_len = 7
         else:
@@ -193,9 +201,6 @@ class PX100(Instrument):
             return self.device.read_bytes(resp_len)
         except:
             return False
-
-    def constructFrame(self, command, value):
-        self.frame = [0xB1, 0xB2, command, *value, 0xB6]
 
     def turnOFF(self):
         print("turnoff")

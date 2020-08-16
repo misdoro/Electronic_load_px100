@@ -153,7 +153,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def reset_dev(self, s):
         self.reset_btn.clearFocus()
         self.backend.datastore.reset()
-        self.backend.send_command({Instrument.COMMAND_RESET: True})
+        self.backend.send_command({Instrument.COMMAND_RESET: 0.0})
 
 
 class GUI:
