@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QTabWidget,
 )
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
@@ -43,9 +44,14 @@ class MainWindow(QtWidgets.QMainWindow):
         main_layout.addLayout(self.plot_layout())
         main_layout.addLayout(self.controls_layout())
 
-        widget = QWidget()
-        widget.setLayout(main_layout)
-        self.setCentralWidget(widget)
+        self.tabs = QTabWidget()
+        self.tab1 = QWidget()
+        self.tab2 = QWidget()
+        self.tabs.addTab(self.tab1, "Main")
+        self.tabs.addTab(self.tab2, "Settings")
+        self.tab1.setLayout(main_layout)
+
+        self.setCentralWidget(self.tabs)
         self.show()
 
     def plot_layout(self):
