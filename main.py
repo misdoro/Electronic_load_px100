@@ -1,13 +1,15 @@
 from instr_thread import InstrumentWorker
 from data_store import DataStore
 from gui import GUI
-from PyQt5.QtCore import QThreadPool
+from PyQt5.QtCore import QCoreApplication, QThreadPool, QSettings
 
 import signal, sys
 
 
 class Main:
     def __init__(self):
+        QCoreApplication.setOrganizationName('github.com/misdoro')
+        QCoreApplication.setApplicationName('Battery tester')
         self.threadpool = QThreadPool()
         self.instr_thread()
         self.datastore = DataStore()

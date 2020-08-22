@@ -4,8 +4,7 @@ matplotlib.use('Qt5Agg')
 
 from PyQt5 import QtCore, QtWidgets
 
-from PyQt5.QtCore import (
-    Qt, )
+from PyQt5.QtCore import (QSettings, Qt, QSize, QPoint)
 
 from PyQt5.QtWidgets import (
     QWidget,
@@ -38,7 +37,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__(*args, **kwargs)
 
         self.setWindowTitle("Battery tester")
-        self.resize(1024, 600)
+        self.load_settings()
 
         main_layout = QHBoxLayout()
         main_layout.addLayout(self.plot_layout())
@@ -128,6 +127,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.backend = backend
 
     def closeEvent(self, event):
+        self.save_settings()
         self.backend.at_exit()
         event.accept()
 
@@ -153,6 +153,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.backend.datastore.write('./tmp/')
         self.backend.datastore.reset()
         self.backend.send_command({Instrument.COMMAND_RESET: 0.0})
+
+    def load_settings(self):
+        settings = QSettings()
+
+        self.resize(settings.value("MainWindow/size", QSize(1024, 600)))
+        self.move(settings.value("MainWindow/pos", QPoint(0, 0)))
+
+    def save_settings(self):
+        settings = QSettings()
+
+        settings.setValue("MainWindow/size", self.size())
+        settings.setValue("MainWindow/pos", self.pos())
+
+        settings.sync()
 
 
 class GUI:
