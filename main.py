@@ -13,6 +13,7 @@ class Main:
         self.datastore = DataStore()
         signal.signal(signal.SIGTERM, self.terminate_process)
         signal.signal(signal.SIGINT, self.terminate_process)
+        self.data_receivers = set()
         GUI(self)
 
     def instr_thread(self):
@@ -21,8 +22,13 @@ class Main:
         self.threadpool.start(self.instr_worker)
         self.instr_worker.signals.start.emit()
 
+    def subscribe(self, receiver):
+        self.data_receivers.add(receiver)
+
     def data_callback(self, data):
         self.datastore.append(data)
+        for r in self.data_receivers:
+            r.data_row(self.datastore, data)
 
     def send_command(self, command):
         self.instr_worker.signals.command.emit(command)

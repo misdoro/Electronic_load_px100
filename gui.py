@@ -48,12 +48,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(widget)
         self.show()
 
-        # Setup a timer to trigger the redraw by calling update_plot.
-        self.timer = QtCore.QTimer()
-        self.timer.setInterval(1000)
-        self.timer.timeout.connect(self.update_plot)
-        self.timer.start()
-
     def plot_layout(self):
         self.canvas = MplCanvas(self, width=8, height=4, dpi=100)
         self.ax = self.canvas.axes
@@ -95,9 +89,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         return layout
 
-    def update_plot(self):
-        print("update_plot")
-        data = self.backend.datastore
+    def data_row(self, data, row):
         if data:
             set_voltage = data.lastval('set_voltage')
             if not self.set_v.hasFocus():
@@ -152,6 +144,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def reset_dev(self, s):
         self.reset_btn.clearFocus()
+        self.backend.datastore.write('./tmp/')
         self.backend.datastore.reset()
         self.backend.send_command({Instrument.COMMAND_RESET: 0.0})
 
@@ -161,4 +154,5 @@ class GUI:
         app = QtWidgets.QApplication(sys.argv)
         self.window = MainWindow()
         self.window.set_backend(backend)
+        backend.subscribe(self.window)
         app.exec_()
