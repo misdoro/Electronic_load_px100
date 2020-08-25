@@ -97,8 +97,11 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.en_checkbox.setCheckState(Qt.Unchecked)
 
-            self.readVoltage.display(data.lastval('voltage'))
-            self.readCurrent.display(data.lastval('current'))
+            voltage = data.lastval('voltage')
+            current = data.lastval('current')
+            self.setWindowTitle("Battery tester {:4.2f}V {:4.2f}A ".format(voltage, current))
+            self.readVoltage.display(voltage)
+            self.readCurrent.display(current)
             self.readCapAH.display(data.lastval('cap_ah'))
             self.readCapWH.display(data.lastval('cap_wh'))
 
