@@ -1,6 +1,6 @@
 from instr_thread import InstrumentWorker
 from data_store import DataStore
-from gui import GUI
+from gui.gui import GUI
 from PyQt5.QtCore import QCoreApplication, QThreadPool, QSettings
 
 import signal, sys

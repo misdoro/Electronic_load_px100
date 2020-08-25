@@ -148,6 +148,8 @@ class PX100(Instrument):
             if self.data[PX100.VERIFY_CMD[command]] == value:
                 break
             print("retry " + command)
+            print(self.data[PX100.VERIFY_CMD[command]])
+            print(value)
             time.sleep(0.7)
 
         if (command == Instrument.COMMAND_RESET):
