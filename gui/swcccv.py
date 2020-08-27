@@ -53,7 +53,8 @@ class SwCCCV(QWidget):
             minCurrent = round(self.minCurrent.value(), 2)
             stepMultiplier = round(self.stepMultiplier.value(), 2)
             targetVoltage = round(self.targetVoltage.value(), 2)
-            if (data.lastval('voltage') < targetVoltage) and self._can_act():
+            if (data.lastval('voltage') < targetVoltage) and (
+                    data.lastval('current') > minCurrent) and self._can_act():
                 self.action_tick = self.tick
                 new_current = round(
                     max(data.lastval('current') * stepMultiplier, minCurrent),
