@@ -185,6 +185,9 @@ class PX100(Instrument):
         if isinstance(value, float):
             f, i = math.modf(value)
             value = [int(i), round(f * 100)]
+        elif isinstance(value, tm):
+            value = (value.second + value.minute * 60 +
+                     value.hour * 3600).to_bytes(2, byteorder='big')
         elif (command == PX100.OUTPUT and value):
             value = [0x01, 0x00]
         else:

@@ -9,6 +9,7 @@ from PyQt5.QtCore import (
     Qt,
     QSize,
     QPoint,
+    QTime,
     QTimer,
 )
 
@@ -66,13 +67,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.en_checkbox.stateChanged.connect(self.enabled_changed)
         self.set_voltage.valueChanged.connect(self.voltage_changed)
         self.set_current.valueChanged.connect(self.current_changed)
+        self.set_timer.timeChanged.connect(self.timer_changed)
         self.resetButton.clicked.connect(self.reset_dev)
 
         self.set_voltage_timer = QTimer(singleShot=True,
                                         timeout=self.voltage_set)
         self.set_current_timer = QTimer(singleShot=True,
                                         timeout=self.current_set)
-        #self.set_timer_timer = QTimer(singleShot=True, timeout=self.timer_set)
+        self.set_timer_timer = QTimer(singleShot=True, timeout=self.timer_set)
 
     def __label_for(self, control, text):
         layout = QHBoxLayout()
@@ -99,11 +101,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
             voltage = data.lastval('voltage')
             current = data.lastval('current')
-            self.setWindowTitle("Battery tester {:4.2f}V {:4.2f}A ".format(voltage, current))
+            self.setWindowTitle("Battery tester {:4.2f}V {:4.2f}A ".format(
+                voltage, current))
             self.readVoltage.display(voltage)
             self.readCurrent.display(current)
             self.readCapAH.display(data.lastval('cap_ah'))
             self.readCapWH.display(data.lastval('cap_wh'))
+            self.readTime.setTime(data.lastval('time'))
 
             xlim = (time(0), max([time(0, 1, 0), data.lastval('time')]))
             self.ax.cla()
@@ -133,22 +137,32 @@ class MainWindow(QtWidgets.QMainWindow):
             self.backend.send_command({Instrument.COMMAND_ENABLE: value})
 
     def voltage_changed(self):
-        self.set_voltage_timer.start(1000)
+        if self.set_voltage.hasFocus():
+            self.set_voltage_timer.start(1000)
 
     def voltage_set(self):
-        if self.set_voltage.hasFocus():
-            value = round(self.set_voltage.value(), 2)
-            self.set_voltage.clearFocus()
-            self.backend.send_command({Instrument.COMMAND_SET_VOLTAGE: value})
+        value = round(self.set_voltage.value(), 2)
+        self.set_voltage.clearFocus()
+        self.backend.send_command({Instrument.COMMAND_SET_VOLTAGE: value})
 
     def current_changed(self):
-        self.set_current_timer.start(1000)
+        if self.set_current.hasFocus():
+            self.set_current_timer.start(1000)
 
     def current_set(self):
-        if self.set_current.hasFocus():
-            value = round(self.set_current.value(), 2)
-            self.set_current.clearFocus()
-            self.backend.send_command({Instrument.COMMAND_SET_CURRENT: value})
+        value = round(self.set_current.value(), 2)
+        self.set_current.clearFocus()
+        self.backend.send_command({Instrument.COMMAND_SET_CURRENT: value})
+
+    def timer_changed(self):
+        if self.set_timer.hasFocus():
+            self.set_timer_timer.start(1000)
+
+    def timer_set(self):
+        set_time = self.set_timer.time()
+        value = time(set_time.hour(), set_time.minute(), set_time.second())
+        self.set_timer.clearFocus()
+        self.backend.send_command({Instrument.COMMAND_SET_TIMER: value})
 
     def reset_dev(self, s):
         self.resetButton.clearFocus()
