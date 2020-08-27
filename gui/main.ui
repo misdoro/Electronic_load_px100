@@ -282,7 +282,7 @@
              <item row="4" column="0">
               <widget class="QLabel" name="label_9">
                <property name="text">
-                <string>Time, s</string>
+                <string>Time</string>
                </property>
               </widget>
              </item>
