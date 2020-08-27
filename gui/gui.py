@@ -172,7 +172,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def reset_dev(self, s):
         self.resetButton.clearFocus()
-        self.tab2.swCCCV.reset()
+        self.swCCCV.reset()
         self.backend.datastore.write('./tmp/')
         self.backend.datastore.reset()
         self.backend.send_command({Instrument.COMMAND_RESET: 0.0})
