@@ -129,7 +129,7 @@
                 </size>
                </property>
                <property name="currentSection">
-                <enum>QDateTimeEdit::MinuteSection</enum>
+                <enum>QDateTimeEdit::HourSection</enum>
                </property>
                <property name="displayFormat">
                 <string>h:mm:ss</string>
@@ -211,71 +211,162 @@
              <item row="0" column="0">
               <widget class="QLabel" name="label_3">
                <property name="text">
-                <string>Current</string>
+                <string>Voltage</string>
                </property>
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QLCDNumber" name="readCurrent">
-               <property name="digitCount">
-                <number>4</number>
+              <widget class="QLabel" name="readVoltage">
+               <property name="palette">
+                <palette>
+                 <active>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>0</red>
+                     <green>85</green>
+                     <blue>0</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </active>
+                 <inactive>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>0</red>
+                     <green>85</green>
+                     <blue>0</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </inactive>
+                 <disabled>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>160</red>
+                     <green>162</green>
+                     <blue>162</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </disabled>
+                </palette>
                </property>
-               <property name="segmentStyle">
-                <enum>QLCDNumber::Flat</enum>
+               <property name="font">
+                <font>
+                 <pointsize>16</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>0.0 V</string>
                </property>
               </widget>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_4">
                <property name="text">
-                <string>Voltage</string>
+                <string>Current</string>
                </property>
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QLCDNumber" name="readVoltage">
-               <property name="smallDecimalPoint">
-                <bool>false</bool>
+              <widget class="QLabel" name="readCurrent">
+               <property name="palette">
+                <palette>
+                 <active>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>170</red>
+                     <green>0</green>
+                     <blue>0</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </active>
+                 <inactive>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>170</red>
+                     <green>0</green>
+                     <blue>0</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </inactive>
+                 <disabled>
+                  <colorrole role="WindowText">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>160</red>
+                     <green>162</green>
+                     <blue>162</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </disabled>
+                </palette>
                </property>
-               <property name="digitCount">
-                <number>4</number>
+               <property name="font">
+                <font>
+                 <pointsize>16</pointsize>
+                </font>
                </property>
-               <property name="segmentStyle">
-                <enum>QLCDNumber::Flat</enum>
+               <property name="text">
+                <string>0.0 A</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLabel" name="readCapAH">
+               <property name="font">
+                <font>
+                 <pointsize>16</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>0.0 AH</string>
                </property>
               </widget>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_5">
                <property name="text">
-                <string>Capacity, AH</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLCDNumber" name="readCapAH">
-               <property name="digitCount">
-                <number>4</number>
-               </property>
-               <property name="segmentStyle">
-                <enum>QLCDNumber::Flat</enum>
+                <string>Capacity</string>
                </property>
               </widget>
              </item>
              <item row="3" column="0">
               <widget class="QLabel" name="label_6">
                <property name="text">
-                <string>Capacity, WH</string>
+                <string>Capacity</string>
                </property>
               </widget>
              </item>
              <item row="3" column="1">
-              <widget class="QLCDNumber" name="readCapWH">
-               <property name="digitCount">
-                <number>4</number>
+              <widget class="QLabel" name="readCapWH">
+               <property name="font">
+                <font>
+                 <pointsize>16</pointsize>
+                </font>
                </property>
-               <property name="segmentStyle">
-                <enum>QLCDNumber::Flat</enum>
+               <property name="text">
+                <string>0.0 WH</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QLabel" name="readTime">
+               <property name="font">
+                <font>
+                 <pointsize>16</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>00:00:00</string>
                </property>
               </widget>
              </item>
@@ -283,25 +374,6 @@
               <widget class="QLabel" name="label_9">
                <property name="text">
                 <string>Time</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QTimeEdit" name="readTime">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-               <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::NoButtons</enum>
-               </property>
-               <property name="currentSection">
-                <enum>QDateTimeEdit::MinuteSection</enum>
-               </property>
-               <property name="displayFormat">
-                <string>h:mm:ss</string>
                </property>
               </widget>
              </item>

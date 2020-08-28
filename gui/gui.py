@@ -106,11 +106,11 @@ class MainWindow(QtWidgets.QMainWindow):
             current = data.lastval('current')
             self.setWindowTitle("Battery tester {:4.2f}V {:4.2f}A ".format(
                 voltage, current))
-            self.readVoltage.display(voltage)
-            self.readCurrent.display(current)
-            self.readCapAH.display(data.lastval('cap_ah'))
-            self.readCapWH.display(data.lastval('cap_wh'))
-            self.readTime.setTime(data.lastval('time'))
+            self.readVoltage.setText("{:5.3f} V".format(voltage))
+            self.readCurrent.setText("{:5.3f} A".format(current))
+            self.readCapAH.setText("{:5.3f} AH".format(data.lastval('cap_ah')))
+            self.readCapWH.setText("{:5.3f} WH".format(data.lastval('cap_wh')))
+            self.readTime.setText(data.lastval('time').strftime("%H:%M:%S"))
 
             xlim = (time(0), max([time(0, 1, 0), data.lastval('time')]))
             self.ax.cla()
