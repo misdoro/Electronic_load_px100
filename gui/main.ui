@@ -48,7 +48,7 @@
          </widget>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout">
+         <layout class="QVBoxLayout" name="controlsLayout">
           <item>
            <widget class="QCheckBox" name="en_checkbox">
             <property name="text">

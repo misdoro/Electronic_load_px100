@@ -31,6 +31,7 @@ from datetime import time
 
 from instruments.instrument import Instrument
 from gui.swcccv import SwCCCV
+from gui.internal_r import InternalR
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -51,6 +52,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.map_controls()
         self.tab2 = uic.loadUi("gui/settings.ui")
         self.swCCCV = SwCCCV()
+        self.internal_r = InternalR()
+        self.controlsLayout.insertWidget(3, self.internal_r)
         self.tab2.layout().addWidget(self.swCCCV)
         self.tabs.addTab(self.tab2, "Settings")
         self.show()
@@ -129,9 +132,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.backend = backend
         backend.subscribe(self)
         self.swCCCV.set_backend(backend)
+        self.internal_r.set_backend(backend)
 
     def closeEvent(self, event):
         self.swCCCV.save_settings()
+        self.internal_r.save_settings()
         self.save_settings()
         self.backend.at_exit()
         event.accept()
@@ -173,6 +178,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def reset_dev(self, s):
         self.resetButton.clearFocus()
         self.swCCCV.reset()
+        self.internal_r.reset()
         self.backend.datastore.write('./tmp/')
         self.backend.datastore.reset()
         self.backend.send_command({Instrument.COMMAND_RESET: 0.0})
