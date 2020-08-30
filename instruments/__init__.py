@@ -29,4 +29,5 @@ class Instruments:
         return self.instruments
 
     def instr(self):
-        return self.instruments[0]
+        if self.instruments:
+            return self.instruments[0]

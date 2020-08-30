@@ -29,6 +29,8 @@ class InstrumentWorker(QRunnable):
     def run(self):
         instruments = Instruments()
         self.instr = instruments.instr()
+        if not self.instr:
+            return
 
         while self.loop:
             if len(self.commands) > 0:
