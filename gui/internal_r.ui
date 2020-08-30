@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>272</width>
-    <height>217</height>
+    <width>171</width>
+    <height>250</height>
    </rect>
   </property>
   <property name="title">
@@ -56,7 +56,17 @@
     </layout>
    </item>
    <item>
-    <widget class="QTableView" name="resultsTable"/>
+    <widget class="QTableView" name="resultsTable">
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <attribute name="horizontalHeaderMinimumSectionSize">
+      <number>30</number>
+     </attribute>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+    </widget>
    </item>
   </layout>
  </widget>

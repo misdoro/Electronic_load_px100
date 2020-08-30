@@ -34,8 +34,8 @@
         <item>
          <widget class="QWidget" name="plot_placeholder" native="true">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-            <horstretch>0</horstretch>
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+            <horstretch>9</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
@@ -379,19 +379,6 @@
              </item>
             </layout>
            </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
           </item>
           <item>
            <widget class="QPushButton" name="resetButton">

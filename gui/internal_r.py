@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QGroupBox
+from PyQt5.QtWidgets import QWidget, QGroupBox, QHeaderView
 from PyQt5.QtCore import QAbstractTableModel, QModelIndex, QSettings, Qt
 from PyQt5 import uic
 
@@ -57,6 +57,7 @@ class InternalR(QGroupBox):
         self.measurePeriod.valueChanged.connect(self.param_changed)
         self.tableModel = InternalRTableModel()
         self.resultsTable.setModel(self.tableModel)
+        self.resultsTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch);
         self.load_settings()
         self.reset()
 
@@ -138,7 +139,7 @@ class InternalR(QGroupBox):
                                                             self.pre_current)
 
         row = {
-            'step': round(self.acq_steps[-1] * self.v_period, 2),
+            'step': round((self.acq_steps[-1] + 1) * self.v_period, 2),
             'r_a': round(r_a, 4),
             'r_b': round(r_b, 4),
         }
