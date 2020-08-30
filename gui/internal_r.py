@@ -35,9 +35,10 @@ class InternalRTableModel(QAbstractTableModel):
             return str(value)
 
     def write(self, path, prefix):
-        filename = path + "/" + prefix + "_internal_r_" + datetime.now(
-        ).isoformat() + ".csv"
-        self._data.drop_duplicates().to_csv(filename)
+        if self.rowCount(1):
+            filename = path + "/" + prefix + "_internal_r_" + datetime.now(
+            ).isoformat() + ".csv"
+            self._data.drop_duplicates().to_csv(filename)
 
     def reset(self):
         self._data = DataFrame(columns=['step', 'r_a', 'r_b'])
