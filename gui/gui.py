@@ -82,13 +82,6 @@ class MainWindow(QtWidgets.QMainWindow):
                                         timeout=self.current_set)
         self.set_timer_timer = QTimer(singleShot=True, timeout=self.timer_set)
 
-    def __label_for(self, control, text):
-        layout = QHBoxLayout()
-        layout.addWidget(QLabel(text))
-        layout.addWidget(control)
-
-        return layout
-
     def data_row(self, data, row):
         if data:
             set_voltage = data.lastval('set_voltage')
@@ -138,6 +131,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.swCCCV.save_settings()
         self.internal_r.save_settings()
         self.save_settings()
+        self.internal_r.write('./tmp', self.cellLabel.text())
+        self.backend.datastore.write('./tmp', self.cellLabel.text())
         self.backend.at_exit()
         event.accept()
 
@@ -178,8 +173,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def reset_dev(self, s):
         self.resetButton.clearFocus()
         self.swCCCV.reset()
+        self.internal_r.write('./tmp', self.cellLabel.text())
+        self.backend.datastore.write('./tmp', self.cellLabel.text())
         self.internal_r.reset()
-        self.backend.datastore.write('./tmp/')
         self.backend.datastore.reset()
         self.backend.send_command({Instrument.COMMAND_RESET: 0.0})
 
@@ -188,12 +184,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.resize(settings.value("MainWindow/size", QSize(1024, 600)))
         self.move(settings.value("MainWindow/pos", QPoint(0, 0)))
+        self.cellLabel.setText(settings.value("MainWindow/cellLabel",
+                                              'Cell x'))
 
     def save_settings(self):
         settings = QSettings()
 
         settings.setValue("MainWindow/size", self.size())
         settings.setValue("MainWindow/pos", self.pos())
+        settings.setValue("MainWindow/cellLabel", self.cellLabel.text())
 
         settings.sync()
 

@@ -2,6 +2,8 @@ from PyQt5.QtWidgets import QWidget, QGroupBox, QHeaderView
 from PyQt5.QtCore import QAbstractTableModel, QModelIndex, QSettings, Qt
 from PyQt5 import uic
 
+from datetime import datetime
+
 from pandas import DataFrame
 
 from instruments.instrument import Instrument
@@ -32,6 +34,11 @@ class InternalRTableModel(QAbstractTableModel):
             value = self._data.iloc[index.row(), index.column()]
             return str(value)
 
+    def write(self, path, prefix):
+        filename = path + "/" + prefix + "_internal_r_" + datetime.now(
+        ).isoformat() + ".csv"
+        self._data.drop_duplicates().to_csv(filename)
+
     def reset(self):
         self._data = DataFrame(columns=['step', 'r_a', 'r_b'])
 
@@ -57,7 +64,8 @@ class InternalR(QGroupBox):
         self.measurePeriod.valueChanged.connect(self.param_changed)
         self.tableModel = InternalRTableModel()
         self.resultsTable.setModel(self.tableModel)
-        self.resultsTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch);
+        self.resultsTable.horizontalHeader().setSectionResizeMode(
+            QHeaderView.Stretch)
         self.load_settings()
         self.reset()
 
@@ -87,6 +95,9 @@ class InternalR(QGroupBox):
         self.acq_steps = []
         self.idle()
         self.tableModel.reset()
+
+    def write(self, path, prefix):
+        self.tableModel.write(path, prefix)
 
     def idle(self):
         self.mode = MODE_IDLE

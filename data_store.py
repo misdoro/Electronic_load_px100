@@ -18,9 +18,10 @@ class DataStore:
         self.lastrow = row
         self.data = self.data.append(row, ignore_index=True)
 
-    def write(self, path):
+    def write(self, path, prefix):
         print(self.data)
-        filename = path + "/" + datetime.now().isoformat() + ".csv"
+        filename = path + "/" + prefix + "_raw_" + datetime.now().isoformat(
+        ) + ".csv"
         self.data.drop_duplicates().to_csv(filename)
 
     def plot(self, **args):
