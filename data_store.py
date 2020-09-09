@@ -1,6 +1,6 @@
 from pandas import DataFrame
 from datetime import datetime
-
+from os import path
 
 class DataStore:
     def __init__(self):
@@ -18,11 +18,11 @@ class DataStore:
         self.lastrow = row
         self.data = self.data.append(row, ignore_index=True)
 
-    def write(self, path, prefix):
-        print(self.data)
-        filename = path + "/" + prefix + "_raw_" + datetime.now().isoformat(
-        ) + ".csv"
-        self.data.drop_duplicates().to_csv(filename)
+    def write(self, basedir, prefix):
+        filename = "{}_raw_{}.csv".format(prefix, datetime.now().strftime("%Y%m%d_%H%M%S"))
+        full_path = path.join(basedir, filename)
+        print("Write RAW data to {}".format(path.relpath(full_path)))
+        self.data.drop_duplicates().to_csv(full_path)
 
     def plot(self, **args):
         return self.data.plot(**args)

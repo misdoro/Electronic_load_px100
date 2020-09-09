@@ -7,6 +7,7 @@ from datetime import datetime
 from pandas import DataFrame
 
 from instruments.instrument import Instrument
+from os import path
 
 MODE_IDLE = 0
 MODE_PREPARE = 1
@@ -31,11 +32,12 @@ class InternalRTableModel(QAbstractTableModel):
             value = self._data.iloc[index.row(), index.column()]
             return str(value)
 
-    def write(self, path, prefix):
+    def write(self, basedir, prefix):
         if self.rowCount(1):
-            filename = path + "/" + prefix + "_internal_r_" + datetime.now(
-            ).isoformat() + ".csv"
-            self._data.drop_duplicates().to_csv(filename)
+            filename = "{}_internal_r_{}.csv".format(prefix, datetime.now().strftime("%Y%m%d_%H%M%S"))
+            full_path = path.join(basedir, filename)
+            print("Write Internal R data to {}".format(path.relpath(full_path)))
+            self._data.drop_duplicates().to_csv(full_path)
 
     def reset(self):
         self.beginResetModel()
