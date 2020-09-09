@@ -32,6 +32,7 @@ from datetime import time
 from instruments.instrument import Instrument
 from gui.swcccv import SwCCCV
 from gui.internal_r import InternalR
+from gui.log_control import LogControl
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -51,10 +52,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.plot_placeholder.setLayout(self.plot_layout())
         self.map_controls()
         self.tab2 = uic.loadUi("gui/settings.ui")
+        self.logControl = LogControl()
         self.swCCCV = SwCCCV()
         self.internal_r = InternalR()
         self.controlsLayout.insertWidget(3, self.internal_r)
-        self.tab2.layout().addWidget(self.swCCCV)
+        self.tab2.layout().addWidget(self.logControl, 0, 0)
+        self.tab2.layout().addWidget(self.swCCCV, 1, 0)
         self.tabs.addTab(self.tab2, "Settings")
         self.show()
 
@@ -128,11 +131,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.internal_r.set_backend(backend)
 
     def closeEvent(self, event):
+        self.logControl.save_settings()
         self.swCCCV.save_settings()
         self.internal_r.save_settings()
         self.save_settings()
-        self.internal_r.write('./tmp', self.cellLabel.text())
-        self.backend.datastore.write('./tmp', self.cellLabel.text())
+        self.write_logs()
+
         self.backend.at_exit()
         event.accept()
 
@@ -172,9 +176,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def reset_dev(self, s):
         self.resetButton.clearFocus()
+        self.write_logs()
         self.swCCCV.reset()
-        self.internal_r.write('./tmp', self.cellLabel.text())
-        self.backend.datastore.write('./tmp', self.cellLabel.text())
         self.internal_r.reset()
         self.backend.datastore.reset()
         self.backend.send_command({Instrument.COMMAND_RESET: 0.0})
@@ -186,6 +189,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.move(settings.value("MainWindow/pos", QPoint(0, 0)))
         self.cellLabel.setText(settings.value("MainWindow/cellLabel",
                                               'Cell x'))
+
+    def write_logs(self):
+        if self.logControl.isChecked():
+            self.internal_r.write(self.logControl.full_path,
+                                  self.cellLabel.text())
+            self.backend.datastore.write(self.logControl.full_path,
+                                         self.cellLabel.text())
 
     def save_settings(self):
         settings = QSettings()
