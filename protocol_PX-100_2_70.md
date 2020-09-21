@@ -25,10 +25,10 @@ No line end characters is sent or expected.
 
 The control frame looks like:
 ```
-  0xB1 0xB2 CMD D1 D2 0xB3 0xB4
+  0xB1 0xB2 CMD D1 D2 0xB6
 ```
 
-with 2 header bytes `0xB1 0xB2` and 2 trailing bytes `0xB3 0xB4`
+with 2 header bytes `0xB1 0xB2` and a trailing byte `0xB6`
 
 Data format of control commands differs from the query commands.
 
