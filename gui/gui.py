@@ -1,27 +1,21 @@
 import sys
+
 import matplotlib
+
 matplotlib.use('Qt5Agg')
 
-from PyQt5 import QtCore, QtWidgets, uic
+from PyQt5 import QtWidgets, uic
 
 from PyQt5.QtCore import (
     QSettings,
     Qt,
     QSize,
     QPoint,
-    QTime,
     QTimer,
 )
 
 from PyQt5.QtWidgets import (
-    QWidget,
-    QCheckBox,
     QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QTabWidget,
 )
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar

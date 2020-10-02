@@ -1,6 +1,8 @@
-from pandas import DataFrame
 from datetime import datetime
 from os import path
+
+from pandas import DataFrame
+
 
 class DataStore:
     def __init__(self):

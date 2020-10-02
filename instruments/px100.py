@@ -4,8 +4,8 @@ written by Mikhail Doronin
 licensed as GPLv3
 """
 
-import time
 import math
+import time
 from datetime import time as tm
 
 from instruments.instrument import Instrument

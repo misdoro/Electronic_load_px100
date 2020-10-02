@@ -1,7 +1,8 @@
-from PyQt5.QtCore import QObject, QRunnable, QTimer, pyqtSignal, pyqtSlot
+import time
+
+from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot
 
 from instruments import Instruments
-import time
 
 
 class InstrumentSignals(QObject):

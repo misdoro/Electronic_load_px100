@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QGroupBox, QFileDialog
-from PyQt5.QtCore import QSettings
-from PyQt5 import uic
-
 from os import path
+
+from PyQt5 import uic
+from PyQt5.QtCore import QSettings
+from PyQt5.QtWidgets import QGroupBox, QFileDialog
 
 
 class LogControl(QGroupBox):

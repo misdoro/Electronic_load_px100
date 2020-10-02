@@ -1,13 +1,12 @@
-from PyQt5.QtWidgets import QWidget, QGroupBox, QHeaderView
-from PyQt5.QtCore import QAbstractTableModel, QModelIndex, QSettings, Qt
-from PyQt5 import uic
-
 from datetime import datetime
+from os import path
 
+from PyQt5 import uic
+from PyQt5.QtCore import QAbstractTableModel, QModelIndex, QSettings, Qt
+from PyQt5.QtWidgets import QGroupBox, QHeaderView
 from pandas import DataFrame
 
 from instruments.instrument import Instrument
-from os import path
 
 MODE_IDLE = 0
 MODE_PREPARE = 1

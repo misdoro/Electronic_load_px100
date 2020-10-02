@@ -1,9 +1,11 @@
-from instr_thread import InstrumentWorker
+import signal
+import sys
+
+from PyQt5.QtCore import QCoreApplication, QThreadPool
+
 from data_store import DataStore
 from gui.gui import GUI
-from PyQt5.QtCore import QCoreApplication, QThreadPool, QSettings
-
-import signal, sys
+from instr_thread import InstrumentWorker
 
 
 class Main:
