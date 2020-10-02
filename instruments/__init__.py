@@ -9,7 +9,17 @@ class Instruments:
     def __init__(self):
         self.rm = visa.ResourceManager()
         self.instruments = []
-        print("instruments")
+        self.discover()
+
+    def list(self):
+        return self.instruments
+
+    def instr(self):
+        if self.instruments:
+            return self.instruments[0]
+
+    def discover(self):
+        print("Detecting instruments...")
         for i in self.rm.list_resources():
             print(i)
             inst = self.rm.open_resource(i)
@@ -24,10 +34,6 @@ class Instruments:
             except:
                 print("err")
                 inst.close()
-
-    def list(self):
-        return self.instruments
-
-    def instr(self):
-        if self.instruments:
-            return self.instruments[0]
+        else:
+            if len(self.instruments) == 0:
+                print("No instruments found")
