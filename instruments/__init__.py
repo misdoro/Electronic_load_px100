@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import visa
+import pyvisa as visa
 
 from instruments import px100
 

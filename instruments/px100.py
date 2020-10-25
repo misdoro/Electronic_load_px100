@@ -217,7 +217,6 @@ class PX100(Instrument):
         self.device.close()
 
     def __clear_device(self):
-        self.device.clear()
         self.device.read_bytes(self.device.bytes_in_buffer)
 
     def __next_aux(self):
