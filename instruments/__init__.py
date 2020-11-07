@@ -22,7 +22,12 @@ class Instruments:
         print("Detecting instruments...")
         for i in self.rm.list_resources():
             print(i)
-            inst = self.rm.open_resource(i)
+            try:
+                inst = self.rm.open_resource(i)
+            except:
+                print("err opening instrument")
+                continue
+
             try:
                 driver = px100.PX100(
                     inst)  #Todo: loop over drivers if multiple
@@ -34,6 +39,7 @@ class Instruments:
             except:
                 print("err")
                 inst.close()
+
         else:
             if len(self.instruments) == 0:
                 print("No instruments found")
