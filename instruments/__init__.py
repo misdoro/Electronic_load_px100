@@ -28,17 +28,28 @@ class Instruments:
                 print("err opening instrument")
                 continue
 
+            if not isinstance(inst, visa.resources.Resource):
+                continue
+
             try:
-                driver = px100.PX100(
-                    inst)  #Todo: loop over drivers if multiple
-                if (driver.probe()):
+                driver = px100.PX100(inst)  #Todo: loop over drivers if multiple
+                if driver.probe():
                     self.instruments.append(driver)
                     print("found " + driver.name)
                 else:
                     print("ko")
-            except:
+            except Exception as inst:
+                print(type(inst))  # the exception instance
+                print(inst.args)  # arguments stored in .args
+                print(inst)
                 print("err")
-                inst.close()
+                try:
+                    inst.close()
+                except Exception as inst:
+                    print(type(inst))  # the exception instance
+                    print(inst.args)  # arguments stored in .args
+                    print(inst)
+                    print("no close")
 
         else:
             if len(self.instruments) == 0:
