@@ -5,6 +5,7 @@ licensed as GPLv3
 """
 
 import math
+import pyvisa as visa
 import time
 from datetime import time as tm
 
@@ -111,6 +112,16 @@ class PX100(Instrument):
 
     def probe(self):
         print("probe")
+        if (self.device.interface_type != visa.constants.InterfaceType.asrl):
+            return False
+        try:
+            self.device.baud_rate = 9600
+            self.device.data_bits = 8
+            self.device.stop_bits = visa.constants.StopBits.one
+            self.device.parity = visa.constants.Parity.none
+        except:
+            return False
+
         if (self.getVal(PX100.TEMP)):
             return True
         else:
