@@ -119,6 +119,8 @@ class PX100(Instrument):
             self.device.data_bits = 8
             self.device.stop_bits = visa.constants.StopBits.one
             self.device.parity = visa.constants.Parity.none
+
+            self.__clear_device()
         except:
             return False
 
