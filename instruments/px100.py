@@ -9,6 +9,7 @@ import pyvisa as visa
 import time
 from datetime import time as tm
 
+from numbers import Number
 from instruments.instrument import Instrument
 
 
@@ -94,8 +95,6 @@ class PX100(Instrument):
         print(device)
         self.device = device
         self.name = "PX100"
-        self.device.timeout = 500
-        self.device.baud_rate = 9600
         self.aux_index = 0
         self.data = {
             'is_on': 0.,
@@ -112,22 +111,13 @@ class PX100(Instrument):
 
     def probe(self):
         print("probe")
-        if (self.device.interface_type != visa.constants.InterfaceType.asrl):
-            return False
-        try:
-            self.device.baud_rate = 9600
-            self.device.data_bits = 8
-            self.device.stop_bits = visa.constants.StopBits.one
-            self.device.parity = visa.constants.Parity.none
-
-            self.__clear_device()
-        except:
+        if not isinstance(self.device, visa.resources.SerialInstrument):
             return False
 
-        if (self.getVal(PX100.TEMP)):
-            return True
-        else:
-            return False
+        self.__setup_device()
+        self.__clear_device()
+
+        return self.__is_number(self.getVal(PX100.VOLTAGE))
 
     def readAll(self, read_all_aux=False):
         print("readAll")
@@ -217,7 +207,11 @@ class PX100(Instrument):
             resp_len = 1
         try:
             return self.device.read_bytes(resp_len)
-        except:
+        except Exception as inst:
+            print(type(inst))    # the exception instance
+            print(inst.args)     # arguments stored in .args
+            print(inst)
+            print("error reading bytes")
             return False
 
     def turnOFF(self):
@@ -229,6 +223,17 @@ class PX100(Instrument):
         time.sleep(.2)
         self.device.close()
 
+    def __setup_device(self):
+        try:
+            self.device.timeout = 500
+            self.device.baud_rate = 9600
+            self.device.data_bits = 8
+            self.device.stop_bits = visa.constants.StopBits.one
+            self.device.parity = visa.constants.Parity.none
+            self.device.flow_control = visa.constants.ControlFlow.none
+        except:
+            pass
+
     def __clear_device(self):
         self.device.read_bytes(self.device.bytes_in_buffer)
 
@@ -237,3 +242,6 @@ class PX100(Instrument):
         if self.aux_index >= len(PX100.AUX_VALS):
             self.aux_index = 0
         return self.aux_index
+
+    def __is_number(self, value):
+        return isinstance(value, Number) and not isinstance(value, bool)
