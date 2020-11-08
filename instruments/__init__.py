@@ -7,7 +7,7 @@ from instruments import px100
 
 class Instruments:
     def __init__(self):
-        self.rm = visa.ResourceManager()
+        self.rm = visa.ResourceManager('@py')
         self.instruments = []
         self.discover()
 
