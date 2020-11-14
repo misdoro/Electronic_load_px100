@@ -21,9 +21,9 @@ jobs:
         pip install -r requirements.txt
     - name: build with pyinstaller
       run: |
-        pyinstaller -F px100.spec
+        pyinstaller px100.spec
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: px100.exe
-        path: dist
+        name: px100
+        path: dist/*
