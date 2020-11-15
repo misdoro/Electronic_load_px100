@@ -22,8 +22,17 @@ jobs:
     - name: build with pyinstaller
       run: |
         pyinstaller px100.spec
+    - name: Build NSIS installer package
+      run: |
+        makensis -VERSION
+        makensis px100.nsi
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
         name: px100
         path: dist/*
+    - name: Upload installer artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: installer
+        path: Install*
