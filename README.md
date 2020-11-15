@@ -19,9 +19,15 @@ See the [v2.70 binary Protocol description](protocol_PX-100_2_70.md)
 
 # Installing
 
+## Windows
+
+An installer can be downloaded from the[https://github.com/misdoro/Electronic_load_px100/releases/latest](releases page)
+
+## Linux / macOS
+
 Python is required to run this software. Version 3.6 or newer is required.
 
-Run the following line to install dependencies:
+Run the following line in terminal to install dependencies:
 ```
 pip install --user -r requirements.txt
 ```
