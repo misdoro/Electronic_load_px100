@@ -21,7 +21,7 @@ See the [v2.70 binary Protocol description](protocol_PX-100_2_70.md)
 
 ## Windows
 
-An installer can be downloaded from the[https://github.com/misdoro/Electronic_load_px100/releases/latest](releases page)
+An installer can be downloaded from the (releases page)[https://github.com/misdoro/Electronic_load_px100/releases/latest]
 
 ## Linux / macOS
 
