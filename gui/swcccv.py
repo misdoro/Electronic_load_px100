@@ -1,21 +1,21 @@
 from PyQt5 import uic
 from PyQt5.QtCore import QSettings
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QGroupBox
 
 from instruments.instrument import Instrument
 
 
-class SwCCCV(QWidget):
+class SwCCCV(QGroupBox):
     def __init__(self, *args, **kwargs):
         super(SwCCCV, self).__init__(*args, **kwargs)
         uic.loadUi("gui/swcccv.ui", self)
-        self.load_settings()
-        self.reset()
+        self._load_settings()
+        self._reset()
 
-    def load_settings(self):
+    def _load_settings(self):
         settings = QSettings()
 
-        self.is_enabled.setChecked(
+        self.setChecked(
             settings.value("SwCCCV/enabled", True, type=bool))
         self.baseCurrent.setValue(
             settings.value("SwCCCV/baseCurrent", 5., type=float))
@@ -29,7 +29,7 @@ class SwCCCV(QWidget):
     def save_settings(self):
         settings = QSettings()
 
-        settings.setValue("SwCCCV/enabled", self.is_enabled.isChecked())
+        settings.setValue("SwCCCV/enabled", self.isChecked())
         settings.setValue("SwCCCV/baseCurrent", self.baseCurrent.value())
         settings.setValue("SwCCCV/minCurrent", self.minCurrent.value())
         settings.setValue("SwCCCV/stepMultiplier", self.stepMultiplier.value())
@@ -37,7 +37,7 @@ class SwCCCV(QWidget):
 
         settings.sync()
 
-    def reset(self):
+    def _reset(self):
         print("swcccv_reset")
         self.tick = 0
         self.action_tick = 0
@@ -47,7 +47,7 @@ class SwCCCV(QWidget):
         backend.subscribe(self)
 
     def data_row(self, data, row):
-        if data and self.is_enabled.isChecked() and data.lastval('is_on'):
+        if data and self.isChecked() and data.lastval('is_on'):
             self.tick += 1
 
             minCurrent = round(self.minCurrent.value(), 2)
