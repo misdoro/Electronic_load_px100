@@ -1,5 +1,3 @@
-import sys
-
 import matplotlib
 
 matplotlib.use('Qt5Agg')
@@ -27,6 +25,7 @@ from instruments.instrument import Instrument
 from gui.swcccv import SwCCCV
 from gui.internal_r import InternalR
 from gui.log_control import LogControl
+from sys import argv
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -203,7 +202,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 class GUI:
     def __init__(self, backend):
-        app = QtWidgets.QApplication(sys.argv)
+        app = QtWidgets.QApplication(argv)
         self.window = MainWindow()
         self.window.set_backend(backend)
         app.exec_()

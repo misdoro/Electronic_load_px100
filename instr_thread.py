@@ -1,4 +1,4 @@
-import time
+from time import sleep
 
 from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot
 
@@ -38,7 +38,7 @@ class InstrumentWorker(QRunnable):
                 self.handle_command(self.commands.pop(0))
             if self.running:
                 self.signals.data_row.emit(self.instr.readAll())
-            time.sleep(.5)
+            sleep(.5)
 
         self.instr.close()
 

@@ -4,12 +4,13 @@ written by Mikhail Doronin
 licensed as GPLv3
 """
 
-import math
-import pyvisa as visa
-import time
-from datetime import time as tm
-
+from datetime import time
+from math import modf
 from numbers import Number
+from time import sleep
+
+import pyvisa as visa
+
 from instruments.instrument import Instrument
 
 
@@ -100,13 +101,13 @@ class PX100(Instrument):
             'is_on': 0.,
             'voltage': 0.,
             'current': 0.,
-            'time': tm(0),
+            'time': time(0),
             'cap_ah': 0.,
             'cap_wh': 0.,
             'temp': 0,
             'set_current': 0.,
             'set_voltage': 0.,
-            'set_timer': tm(0),
+            'set_timer': time(0),
         }
 
     def probe(self):
@@ -146,14 +147,14 @@ class PX100(Instrument):
 
         for i in range(0, 3):
             self.setVal(PX100.COMMANDS[command], value)
-            time.sleep(0.5)
+            sleep(0.5)
             self.update_val(PX100.VERIFY_CMD[command])
             if self.data[PX100.VERIFY_CMD[command]] == value:
                 break
             print("retry " + command)
             print(self.data[PX100.VERIFY_CMD[command]])
             print(value)
-            time.sleep(0.7)
+            sleep(0.7)
 
         if (command == Instrument.COMMAND_RESET):
             self.update_vals(PX100.AUX_VALS)
@@ -180,15 +181,15 @@ class PX100(Instrument):
             hh = ret[2]
             mm = ret[3]
             ss = ret[4]
-            return tm(hh, mm, ss)  #'{:02d}:{:02d}:{:02d}'.format(hh, mm, ss)
+            return time(hh, mm, ss)  #'{:02d}:{:02d}:{:02d}'.format(hh, mm, ss)
         else:
             return int.from_bytes(ret[2:5], byteorder='big') / mult
 
     def setVal(self, command, value):
         if isinstance(value, float):
-            f, i = math.modf(value)
+            f, i = modf(value)
             value = [int(i), round(f * 100)]
-        elif isinstance(value, tm):
+        elif isinstance(value, time):
             value = (value.second + value.minute * 60 +
                      value.hour * 3600).to_bytes(2, byteorder='big')
         elif (command == PX100.OUTPUT and value):
@@ -220,7 +221,7 @@ class PX100(Instrument):
 
     def close(self):
         self.turnOFF()
-        time.sleep(.2)
+        sleep(.2)
         self.device.close()
 
     def __setup_device(self):

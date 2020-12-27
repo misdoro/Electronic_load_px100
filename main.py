@@ -1,5 +1,5 @@
-import signal
-import sys
+from signal import signal, SIGTERM, SIGINT
+from sys import exit
 
 from PyQt5.QtCore import QCoreApplication, QThreadPool
 
@@ -15,8 +15,8 @@ class Main:
         self.threadpool = QThreadPool()
         self.instr_thread()
         self.datastore = DataStore()
-        signal.signal(signal.SIGTERM, self.terminate_process)
-        signal.signal(signal.SIGINT, self.terminate_process)
+        signal(SIGTERM, self.terminate_process)
+        signal(SIGINT, self.terminate_process)
         self.data_receivers = set()
         GUI(self)
 
@@ -43,7 +43,7 @@ class Main:
 
     def terminate_process(self, signal, _stack):
         self.at_exit()
-        sys.exit()
+        exit()
 
 
 if __name__ == "__main__":
