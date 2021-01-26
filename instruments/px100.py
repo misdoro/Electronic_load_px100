@@ -200,13 +200,14 @@ class PX100(Instrument):
         return ret == 0x6F
 
     def writeFunction(self, command, value):
-        frame = bytearray([0xB1, 0xB2, command, *value, 0xB6])
-        self.device.write_raw(frame)
         if command >= 0x10:
             resp_len = 7
         else:
             resp_len = 1
+
+        frame = bytearray([0xB1, 0xB2, command, *value, 0xB6])
         try:
+            self.device.write_raw(frame)
             return self.device.read_bytes(resp_len)
         except Exception as inst:
             print(type(inst))    # the exception instance
@@ -236,7 +237,15 @@ class PX100(Instrument):
             pass
 
     def __clear_device(self):
-        self.device.read_bytes(self.device.bytes_in_buffer)
+        try:
+            self.device.read_bytes(self.device.bytes_in_buffer)
+        except Exception as inst:
+            print(type(inst))    # the exception instance
+            print(inst.args)     # arguments stored in .args
+            print(inst)
+            print("error reading bytes")
+            self.device.close
+            return False
 
     def __next_aux(self):
         self.aux_index += 1
