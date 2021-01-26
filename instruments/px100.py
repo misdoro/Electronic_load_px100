@@ -115,6 +115,7 @@ class PX100(Instrument):
         if not isinstance(self.device, visa.resources.SerialInstrument):
             return False
 
+        self.port = self.device.resource_name.split('::')[0].replace('ASRL', '')
         self.__setup_device()
         self.__clear_device()
 

@@ -10,6 +10,7 @@ class InstrumentSignals(QObject):
     start = pyqtSignal()
     stop = pyqtSignal()
     data_row = pyqtSignal(dict)
+    status_update = pyqtSignal(str)
     command = pyqtSignal(dict)
 
 
@@ -31,8 +32,10 @@ class InstrumentWorker(QRunnable):
         instruments = Instruments()
         self.instr = instruments.instr()
         if not self.instr:
+            self.signals.status_update.emit("No devices found")
             return
 
+        self.signals.status_update.emit("Connected to {} on {}".format(self.instr.name, self.instr.port))
         while self.loop:
             if len(self.commands) > 0:
                 self.handle_command(self.commands.pop(0))

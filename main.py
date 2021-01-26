@@ -23,6 +23,7 @@ class Main:
     def instr_thread(self):
         self.instr_worker = InstrumentWorker()
         self.instr_worker.signals.data_row.connect(self.data_callback)
+        self.instr_worker.signals.status_update.connect(self.status_callback)
         self.threadpool.start(self.instr_worker)
         self.instr_worker.signals.start.emit()
 
@@ -33,6 +34,11 @@ class Main:
         self.datastore.append(data)
         for r in self.data_receivers:
             r.data_row(self.datastore, data)
+
+    def status_callback(self, status):
+        for r in self.data_receivers:
+            if hasattr(r, 'status_update'):
+                r.status_update(status)
 
     def send_command(self, command):
         self.instr_worker.signals.command.emit(command)

@@ -117,6 +117,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.twinax.set_ylim(0, 10)
             self.canvas.draw()
 
+    def status_update(self, status):
+        self.statusBar().showMessage(status)
+
     def set_backend(self, backend):
         self.backend = backend
         backend.subscribe(self)
