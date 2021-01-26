@@ -10,7 +10,7 @@ class SwCCCV(QGroupBox):
         super(SwCCCV, self).__init__(*args, **kwargs)
         uic.loadUi("gui/swcccv.ui", self)
         self._load_settings()
-        self._reset()
+        self.reset()
 
     def _load_settings(self):
         settings = QSettings()
@@ -37,7 +37,7 @@ class SwCCCV(QGroupBox):
 
         settings.sync()
 
-    def _reset(self):
+    def reset(self):
         print("swcccv_reset")
         self.tick = 0
         self.action_tick = 0
