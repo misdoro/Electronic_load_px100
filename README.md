@@ -23,6 +23,8 @@ See the [v2.70 binary Protocol description](protocol_PX-100_2_70.md)
 
 An installer can be downloaded from the [releases section](https://github.com/misdoro/Electronic_load_px100/releases/latest)
 
+Please use -x86.exe if you are running 32-bit windows.
+
 ## Linux / macOS
 
 Python is required to run this software. Version 3.6 or newer is required.

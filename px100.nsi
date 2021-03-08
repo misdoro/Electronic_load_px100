@@ -5,7 +5,6 @@ Basic installer for battery tester
 !define NAME "Battery tester PX100"
 !define REGPATH_UNINSTSUBKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${NAME}"
 Name "${NAME}"
-OutFile "Install ${NAME}.exe"
 Unicode True
 RequestExecutionLevel User ; We don't need UAC elevation
 InstallDir "" ; Don't set a default $InstDir so we can detect /D= and InstallDirRegKey

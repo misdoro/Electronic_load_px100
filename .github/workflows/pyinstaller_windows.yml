@@ -6,6 +6,9 @@ jobs:
   build:
     name: Build windows installer
     runs-on: windows-latest
+    strategy:
+      matrix:
+        python_arch: [ x64, x86 ]
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -13,10 +16,11 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
+        architecture: ${{ matrix.python_arch }}
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller==4.1
+        pip install pyinstaller==4.2
         pip install -r requirements.txt
     - name: build with pyinstaller
       run: |
@@ -24,12 +28,12 @@ jobs:
     - name: Build NSIS installer package
       run: |
         makensis -VERSION
-        makensis px100.nsi
+        makensis "/XOutFile Battery-Tester-PX100-${{matrix.python_arch}}.exe" px100.nsi
     - name: Upload installer artifact
       uses: actions/upload-artifact@v2
       with:
-        name: installer
-        path: Install*
+        name: installer${{matrix.python_arch}}
+        path: Battery-Tester*
   release:
     name: Prepare a release
     runs-on: ubuntu-latest
@@ -38,10 +42,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Download installer artifact
+      - name: Download installer artifacts
         uses: actions/download-artifact@v2
-        with:
-          name: installer
       - name: List files
         run: |
           ls -l
@@ -55,13 +57,23 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-      - name: Upload Release Asset
+      - name: Upload x64 binary
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: Install Battery tester PX100.exe
-          asset_name: Battery-Tester-PX100.exe
+          asset_path: Battery-Tester-PX100-x64.exe
+          asset_name: Battery-Tester-PX100-x64.exe
+          asset_content_type: application/exe
+      - name: Upload win32 binary
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: Battery-Tester-PX100-x86.exe
+          asset_name: Battery-Tester-PX100-x86.exe
           asset_content_type: application/exe
