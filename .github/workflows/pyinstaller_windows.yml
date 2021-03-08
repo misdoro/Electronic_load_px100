@@ -6,6 +6,9 @@ jobs:
   build:
     name: Build windows installer
     runs-on: windows-latest
+    strategy:
+      matrix:
+        python_arch: [ x64, x86 ]
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -13,6 +16,7 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
+        architecture: ${{ matrix.python_arch }}
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -24,12 +28,12 @@ jobs:
     - name: Build NSIS installer package
       run: |
         makensis -VERSION
-        makensis px100.nsi
+        makensis "/XOutFile Battery-Tester-PX100-${{matrix.python_arch}}.exe" px100.nsi
     - name: Upload installer artifact
       uses: actions/upload-artifact@v2
       with:
-        name: installer
-        path: Install*
+        name: installer${{matrix.python_arch}}
+        path: Battery-Tester*
   release:
     name: Prepare a release
     runs-on: ubuntu-latest
