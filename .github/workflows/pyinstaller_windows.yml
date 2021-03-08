@@ -42,10 +42,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Download installer artifact
+      - name: Download installer artifacts
         uses: actions/download-artifact@v2
-        with:
-          name: installer
       - name: List files
         run: |
           ls -l
@@ -59,13 +57,23 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-      - name: Upload Release Asset
+      - name: Upload x64 binary
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: Install Battery tester PX100.exe
-          asset_name: Battery-Tester-PX100.exe
+          asset_path: Battery-Tester-PX100-x64.exe
+          asset_name: Battery-Tester-PX100-x64.exe
+          asset_content_type: application/exe
+      - name: Upload win32 binary
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: Battery-Tester-PX100-x86.exe
+          asset_name: Battery-Tester-PX100-x86.exe
           asset_content_type: application/exe
