@@ -5,3 +5,4 @@ pyqt5
 pyvisa
 pyvisa-py
 pyserial
+zeroconf
