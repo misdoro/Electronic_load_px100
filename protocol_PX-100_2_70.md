@@ -42,8 +42,8 @@ So 1.23 V will be tranmitted as 0x01 0x17 hexadecimal.
 | Command | Data | Description |
 | -- | -- | -- |
 | 0x01 | 0x0100 - ON \ 0x0000 OFF | Enable or disable the load 
-| 0x02 | D1.D2  | Set cutoff voltage
-| 0x03 | D1.D2  | Set current
+| 0x02 | D1.D2  | Set current
+| 0x03 | D1.D2  | Set cutoff voltage
 | 0x04 | 16-bit unsigned integer | Set timeout in seconds
 | 0x05 | 0x0000 | Reset counters
 
