@@ -1,6 +1,6 @@
 matplotlib
 numpy
-pandas
+pandas < 2.0
 pyqt5
 pyvisa
 pyvisa-py
