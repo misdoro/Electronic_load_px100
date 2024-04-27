@@ -2,6 +2,7 @@ from datetime import datetime
 from os import path
 
 from pandas import DataFrame
+import pandas as pd
 
 
 class DataStore:
@@ -16,9 +17,14 @@ class DataStore:
         self.data = DataFrame()
 
     def append(self, row):
-        print(row)
+        tnow = datetime.now().isoformat(sep= ' ', timespec='milliseconds')
+        print(f"{tnow} time_running={row['time']} is_on={row['is_on']} v={row['voltage']:.3f} i={row['current']:.3f}" \
+            f" Ah={row['cap_ah']:.2f} board_temp={row['temp']} i_setpoint={row['set_current']}" \
+            f" v_setpoint={row['set_voltage']} timer_setpoint={row['set_timer']}")
         self.lastrow = row
-        self.data = self.data.append(row, ignore_index=True)
+        # self.data = self.data.append(row, ignore_index=True)
+        new_row_df = DataFrame([row])
+        self.data = pd.concat([self.data, new_row_df], ignore_index=True)
 
     def write(self, basedir, prefix):
         filename = "{}_raw_{}.csv".format(prefix, datetime.now().strftime("%Y%m%d_%H%M%S"))

@@ -122,7 +122,6 @@ class PX100(Instrument):
         return self.__is_number(self.getVal(PX100.VOLTAGE))
 
     def readAll(self, read_all_aux=False):
-        print("readAll")
         self.__clear_device()
         self.update_vals(PX100.FREQ_VALS)
 
