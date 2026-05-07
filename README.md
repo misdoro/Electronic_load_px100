@@ -1,3 +1,5 @@
+This is a fork from https://github.com/misdoro/Electronic_load_px100 with a few tweaks
+
 # Electronic_load_px100
 150W Electronic load / Battery discharge capacity tester PX-100 protocol and control software.
 
@@ -19,15 +21,7 @@ See the [v2.70 binary Protocol description](protocol_PX-100_2_70.md)
 
 # Installing
 
-## Windows
-
-An installer can be downloaded from the [releases section](https://github.com/misdoro/Electronic_load_px100/releases/latest)
-
-Please use -x86.exe if you are running 32-bit windows.
-
-## Linux / macOS
-
-Python is required to run this software. Version 3.6 or newer is required.
+Python4 is required to run this software. Version 3.6 or newer is required.
 
 Run the following line in terminal to install dependencies:
 ```
@@ -36,7 +30,7 @@ pip install --user -r requirements.txt
 
 Then run
 ```
-python main.py
+python3 main.py
 ```
 to execute the control program.
 

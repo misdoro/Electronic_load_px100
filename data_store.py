@@ -17,24 +17,47 @@ class DataStore:
         self.data = DataFrame()
 
     def append(self, row):
-        tnow = datetime.now().isoformat(sep= ' ', timespec='milliseconds')
-        print(f"{tnow} time_running={row['time']} is_on={row['is_on']} v={row['voltage']:.3f} i={row['current']:.3f}" \
-            f" Ah={row['cap_ah']:.2f} board_temp={row['temp']} i_setpoint={row['set_current']}" \
-            f" v_setpoint={row['set_voltage']} timer_setpoint={row['set_timer']}")
+        # Only log on state changes or significant events to reduce terminal spam
+        current_time = datetime.now()
+        should_log = False
+        
+        # Log on state changes (on/off)
+        if self.lastrow and self.lastrow.get('is_on') != row['is_on']:
+            should_log = True
+            state = "ON" if row['is_on'] else "OFF"
+            print(f"{current_time.isoformat(sep=' ', timespec='seconds')} Device turned {state}")
+        
+        # Log every 60 seconds during operation (instead of 10)
+        elif row.get('is_on') and (not hasattr(self, 'last_log_time') or 
+                                   (current_time - self.last_log_time).total_seconds() > 60):
+            should_log = True
+            print(f"{current_time.isoformat(sep=' ', timespec='seconds')} Running: {row['time']} - V={row['voltage']:.3f} I={row['current']:.3f} Ah={row['cap_ah']:.2f}")
+        
+        if should_log:
+            self.last_log_time = current_time
+
         self.lastrow = row
-        # self.data = self.data.append(row, ignore_index=True)
-        new_row_df = DataFrame([row])
-        self.data = pd.concat([self.data, new_row_df], ignore_index=True)
+
+        # Create DataFrame with explicit columns to avoid FutureWarning
+        if self.data.empty:
+            # If data is empty, create DataFrame directly from row
+            self.data = DataFrame([row])
+        else:
+            # Otherwise use concat with matching columns
+            new_row_df = DataFrame([row], columns=self.data.columns)
+            self.data = pd.concat([self.data, new_row_df], ignore_index=True)
 
     def write(self, basedir, prefix):
         filename = "{}_raw_{}.csv".format(prefix, datetime.now().strftime("%Y%m%d_%H%M%S"))
         full_path = path.join(basedir, filename)
         export_rows = self.data.drop_duplicates()
         if export_rows.shape[0]:
-            print("Write RAW data to {}".format(path.relpath(full_path)))
+            print(f"Saved raw data: {path.basename(full_path)}")
             self.data.drop_duplicates().to_csv(full_path)
+            return full_path
         else:
-            print("no data")
+            print("No data to save")
+            return None
 
     def plot(self, **args):
         return self.data.plot(**args)

@@ -36,11 +36,44 @@ class InstrumentWorker(QRunnable):
             return
 
         self.signals.status_update.emit("Connected to {} on {}".format(self.instr.name, self.instr.port))
+
+        consecutive_errors = 0
+        max_consecutive_errors = 10
+
         while self.loop:
             if len(self.commands) > 0:
                 self.handle_command(self.commands.pop(0))
+
             if self.running:
-                self.signals.data_row.emit(self.instr.readAll())
+                try:
+                    data = self.instr.readAll()
+                    if data:  # Only emit if we got valid data
+                        self.signals.data_row.emit(data)
+                        consecutive_errors = 0  # Reset error counter on success
+                    else:
+                        consecutive_errors += 1
+                except Exception as e:
+                    consecutive_errors += 1
+                    if consecutive_errors % 5 == 1:  # Print every 5th error
+                        print(f"Data read error (consecutive: {consecutive_errors}): {e}")
+
+                    # If too many consecutive errors, try to reconnect
+                    if consecutive_errors >= max_consecutive_errors:
+                        print("Too many consecutive errors, attempting reconnection...")
+                        try:
+                            self.instr.close()
+                            sleep(1)
+                            instruments = Instruments()
+                            new_instr = instruments.instr()
+                            if new_instr:
+                                self.instr = new_instr
+                                consecutive_errors = 0
+                                self.signals.status_update.emit("Reconnected to device")
+                            else:
+                                self.signals.status_update.emit("Reconnection failed")
+                        except:
+                            print("Reconnection attempt failed")
+
             sleep(.5)
 
         self.instr.close()

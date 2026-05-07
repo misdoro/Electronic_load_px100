@@ -121,16 +121,28 @@ class PX100(Instrument):
 
         return self.__is_number(self.getVal(PX100.VOLTAGE))
 
-    def readAll(self, read_all_aux=False):
-        self.__clear_device()
-        self.update_vals(PX100.FREQ_VALS)
+    def readAll(self):
+        # Add validation to ensure we don't return invalid data
+        try:
+            self.update_vals(PX100.FREQ_VALS)
 
-        if read_all_aux:
-            self.update_vals(PX100.AUX_VALS)
-        else:
-            self.update_val(PX100.AUX_VALS[self.__next_aux()])
+            # Validate critical values before returning
+            voltage = self.data.get('voltage')
+            current = self.data.get('current')
+            is_on = self.data.get('is_on')
 
-        return self.data
+            # Only return data if we have valid core measurements
+            if voltage is not None and current is not None and is_on is not None:
+                if self.aux_index % 5 == 0:  # Update aux values less frequently
+                    self.update_vals(PX100.AUX_VALS)
+                self.aux_index += 1
+                return self.data.copy()
+            else:
+                return None  # Return None for invalid data
+
+        except Exception as e:
+            # Don't spam errors, just return None
+            return None
 
     def update_vals(self, keys):
         for key in keys:
@@ -227,7 +239,7 @@ class PX100(Instrument):
 
     def __setup_device(self):
         try:
-            self.device.timeout = 500
+            self.device.timeout = 2000  # Increase from 500ms to 2000ms
             self.device.baud_rate = 9600
             self.device.data_bits = 8
             self.device.stop_bits = visa.constants.StopBits.one
@@ -238,13 +250,17 @@ class PX100(Instrument):
 
     def __clear_device(self):
         try:
-            self.device.read_bytes(self.device.bytes_in_buffer)
+            # Clear any pending data in buffer
+            bytes_available = self.device.bytes_in_buffer
+            if bytes_available > 0:
+                self.device.read_bytes(bytes_available)
         except Exception as inst:
-            print(type(inst))    # the exception instance
-            print(inst.args)     # arguments stored in .args
-            print(inst)
-            print("error reading bytes")
-            self.device.close
+            # Only print error details occasionally
+            if not hasattr(self, '_clear_error_count'):
+                self._clear_error_count = 0
+            self._clear_error_count += 1
+            if self._clear_error_count % 20 == 1:
+                print(f"Buffer clear error (count: {self._clear_error_count})")
             return False
 
     def __next_aux(self):

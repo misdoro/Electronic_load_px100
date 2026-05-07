@@ -5,6 +5,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import QAbstractTableModel, QModelIndex, QSettings, Qt
 from PyQt5.QtWidgets import QGroupBox, QHeaderView
 from pandas import DataFrame
+import pandas as pd
 
 from instruments.instrument import Instrument
 
@@ -23,7 +24,30 @@ class InternalRTableModel(QAbstractTableModel):
 
     def append(self, row):
         self.beginInsertRows(QModelIndex(), self.rowCount(1), self.rowCount(1))
-        self._data = self._data.append(row, ignore_index=True)
+
+        # Create DataFrame with the same columns as existing data
+        new_row_df = DataFrame([row], columns=self._data.columns)
+
+        # Only proceed if the new row has valid data
+        if not new_row_df.empty:
+            # Remove any columns that are entirely NA from the new row
+            new_row_df = new_row_df.dropna(axis=1, how='all')
+
+            # Only concatenate if we have valid data after cleaning
+            if not new_row_df.empty and not new_row_df.isna().all().all():
+                # Ensure columns match before concatenating
+                if self._data.empty:
+                    # If existing data is empty, just assign the new row
+                    self._data = new_row_df
+                else:
+                    # Only concatenate columns that exist in both DataFrames
+                    common_columns = self._data.columns.intersection(new_row_df.columns)
+                    if len(common_columns) > 0:
+                        self._data = pd.concat([
+                            self._data[common_columns],
+                            new_row_df[common_columns]
+                        ], ignore_index=True)
+
         self.endInsertRows()
 
     def data(self, index, role):
@@ -35,8 +59,10 @@ class InternalRTableModel(QAbstractTableModel):
         if self.rowCount(1):
             filename = "{}_internal_r_{}.csv".format(prefix, datetime.now().strftime("%Y%m%d_%H%M%S"))
             full_path = path.join(basedir, filename)
-            print("Write Internal R data to {}".format(path.relpath(full_path)))
+            print(f"Saved internal R data: {path.basename(full_path)}")
             self._data.drop_duplicates().to_csv(full_path)
+            return full_path
+        return None
 
     def reset(self):
         self.beginResetModel()
@@ -98,7 +124,7 @@ class InternalR(QGroupBox):
         self.tableModel.reset()
 
     def write(self, path, prefix):
-        self.tableModel.write(path, prefix)
+        return self.tableModel.write(path, prefix)
 
     def data_row(self, data, row):
         if not self.isChecked() or not self.v_period:
@@ -106,9 +132,12 @@ class InternalR(QGroupBox):
 
         if self._valid_data(data):
             self._data_loop(data)
-        else:
+        elif self.mode != MODE_IDLE:
             self.ignored_rows += 1
             if self.ignored_rows > MAX_BAD_ROWS:
+                if self.mode == MODE_DROP:
+                    self.backend.send_command(
+                        {Instrument.COMMAND_SET_CURRENT: self.pre_current})
                 self._idle()
 
     def _idle(self):
