@@ -19,7 +19,7 @@ See the [v2.70 binary Protocol description](protocol_PX-100_2_70.md)
 
 # Installing
 
-Python4 is required to run this software. Version 3.6 or newer is required.
+Python3 is required to run this software. Version 3.6 or newer is required.
 
 Run the following line in terminal to install dependencies:
 ```
