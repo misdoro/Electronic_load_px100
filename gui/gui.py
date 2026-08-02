@@ -540,7 +540,9 @@ Test plot is attached.
 
 class GUI:
     def __init__(self, backend):
-        app = QtWidgets.QApplication(argv)
+        self.app = QtWidgets.QApplication(argv)
         self.window = MainWindow()
         self.window.set_backend(backend)
-        app.exec()
+
+    def run(self):
+        self.app.exec()

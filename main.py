@@ -12,13 +12,15 @@ class Main:
     def __init__(self):
         QCoreApplication.setOrganizationName('github.com/misdoro')
         QCoreApplication.setApplicationName('Battery tester')
+        self.terminating = False
         self.threadpool = QThreadPool()
         self.instr_thread()
         self.datastore = DataStore()
         signal(SIGTERM, self.terminate_process)
         signal(SIGINT, self.terminate_process)
         self.data_receivers = set()
-        GUI(self)
+        self.gui = GUI(self)
+        self.gui.run()
 
     def instr_thread(self):
         self.instr_worker = InstrumentWorker()
@@ -48,6 +50,14 @@ class Main:
         self.threadpool.waitForDone()
 
     def terminate_process(self, signal, _stack):
+        if self.terminating:
+            return
+        self.terminating = True
+        if hasattr(self, 'gui') and hasattr(self.gui, 'window'):
+            try:
+                self.gui.window.write_logs()
+            except Exception as e:
+                print(f"Error writing logs during termination: {e}")
         self.at_exit()
         exit()
 
