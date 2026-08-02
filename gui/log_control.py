@@ -1,14 +1,18 @@
 from os import path
 
-from PyQt6 import uic
-from PyQt6.QtCore import QSettings
-from PyQt6.QtWidgets import QGroupBox, QFileDialog
+from PySide6.QtCore import QSettings
+from PySide6.QtWidgets import QGroupBox, QFileDialog
+
+from gui.ui_log_control import Ui_LogControl
 
 
 class LogControl(QGroupBox):
     def __init__(self, *args, **kwargs):
         super(LogControl, self).__init__(*args, **kwargs)
-        uic.loadUi("gui/log_control.ui", self)
+        self.ui = Ui_LogControl()
+        self.ui.setupUi(self)
+        for name, value in vars(self.ui).items():
+            setattr(self, name, value)
         self.home = path.expanduser('~')
         self._load_settings()
         self._map_controls()

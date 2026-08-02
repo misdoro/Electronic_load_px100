@@ -1,13 +1,13 @@
 from datetime import datetime
 from os import path
 
-from PyQt6 import uic
-from PyQt6.QtCore import QAbstractTableModel, QModelIndex, QSettings, Qt
-from PyQt6.QtWidgets import QGroupBox, QHeaderView
+from PySide6.QtCore import QAbstractTableModel, QModelIndex, QSettings, Qt
+from PySide6.QtWidgets import QGroupBox, QHeaderView
 from pandas import DataFrame
 import pandas as pd
 
 from instruments.instrument import Instrument
+from gui.ui_internal_r import Ui_is_enabled
 
 MODE_IDLE = 0
 MODE_PREPARE = 1
@@ -87,7 +87,10 @@ class InternalRTableModel(QAbstractTableModel):
 class InternalR(QGroupBox):
     def __init__(self, *args, **kwargs):
         super(InternalR, self).__init__(*args, **kwargs)
-        uic.loadUi("gui/internal_r.ui", self)
+        self.ui = Ui_is_enabled()
+        self.ui.setupUi(self)
+        for name, value in vars(self.ui).items():
+            setattr(self, name, value)
         self.measurePeriod.valueChanged.connect(self.param_changed)
         self.tableModel = InternalRTableModel()
         self.resultsTable.setModel(self.tableModel)

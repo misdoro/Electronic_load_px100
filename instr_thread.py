@@ -1,17 +1,17 @@
 from time import sleep
 
-from PyQt6.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot
+from PySide6.QtCore import QObject, QRunnable, Signal, Slot
 
 from instruments import Instruments
 
 
 class InstrumentSignals(QObject):
-    exit = pyqtSignal()
-    start = pyqtSignal()
-    stop = pyqtSignal()
-    data_row = pyqtSignal(dict)
-    status_update = pyqtSignal(str)
-    command = pyqtSignal(dict)
+    exit = Signal()
+    start = Signal()
+    stop = Signal()
+    data_row = Signal(dict)
+    status_update = Signal(str)
+    command = Signal(dict)
 
 
 class InstrumentWorker(QRunnable):
@@ -27,7 +27,7 @@ class InstrumentWorker(QRunnable):
         self.running = False
         self.commands = []
 
-    @pyqtSlot()
+    @Slot()
     def run(self):
         instruments = Instruments()
         self.instr = instruments.instr()

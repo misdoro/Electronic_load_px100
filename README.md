@@ -33,3 +33,24 @@ python3 main.py
 to execute the control program.
 
 If no PX-100 device is connected, the app now automatically starts with a built-in demo instrument so the UI and logging flow can be tested without hardware.
+
+## Updating Qt UI files
+
+The app uses PySide6-generated Python modules (not runtime `.ui` loading).
+
+When changing any `.ui` file in `gui/`, regenerate all UI modules:
+
+```
+pyside6-uic gui/main.ui -o gui/ui_main.py
+pyside6-uic gui/settings.ui -o gui/ui_settings.py
+pyside6-uic gui/swcccv.ui -o gui/ui_swcccv.py
+pyside6-uic gui/internal_r.ui -o gui/ui_internal_r.py
+pyside6-uic gui/log_control.ui -o gui/ui_log_control.py
+pyside6-uic gui/email_settings.ui -o gui/ui_email_settings.py
+```
+
+Then run:
+```
+python3 main.py
+```
+to confirm the UI loads correctly.

@@ -4,7 +4,7 @@ a = Analysis(
     ['main.py'],
     pathex=['./'],
     binaries=[],
-    datas=[('gui/*.ui', 'gui')],
+    datas=[],
     hiddenimports=['pyvisa_py', 'serial'],
     hookspath=[],
     runtime_hooks=[],

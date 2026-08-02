@@ -1,7 +1,7 @@
 # Copilot Instructions for Electronic_load_px100
 
 ## Project purpose
-- PyQt6 desktop app for controlling a PX-100 electronic load and running battery discharge tests.
+- PySide6 desktop app for controlling a PX-100 electronic load and running battery discharge tests.
 - Core behavior: discover the instrument over PyVISA serial, stream measurements, update UI/plots, save CSV logs, and optionally send email reports.
 
 ## Main architecture
@@ -26,7 +26,7 @@
 ## Change guidelines for this repo
 1. Keep hardware communication behavior stable unless explicitly requested; protocol changes belong in `instruments/px100.py`.
 2. Preserve Qt signal/slot flow between `InstrumentWorker`, `Main`, and GUI subscribers.
-3. For UI updates, keep `.py` and `.ui` files aligned (widgets loaded with `uic.loadUi(...)`).
+3. For UI updates, keep `.py` and `.ui` files aligned and regenerate `gui/ui_*.py` with `pyside6-uic`.
 4. Logging/email changes must not block measurement loop; avoid long/blocking operations in the worker path.
 5. Keep CSV output and test-completion email behavior consistent (`MainWindow.write_logs`, `DataStore.write`, `InternalR.write`).
 6. Prefer focused edits in existing modules over introducing new frameworks or abstractions.
@@ -39,5 +39,5 @@
 
 ## Practical constraints
 - App is stateful and event-driven; avoid race-prone cross-thread UI access.
-- This project supports Python 3.14 and uses modern pandas (`>=2.2`) with the PyQt6/pyvisa/pyserial stack.
+- This project supports Python 3.14 and uses modern pandas (`>=2.2`) with the PySide6/pyvisa/pyserial stack.
 - Device availability is not guaranteed during development; when adding logic, keep graceful handling for missing instruments.

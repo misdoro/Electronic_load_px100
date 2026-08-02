@@ -5,13 +5,13 @@ import tempfile
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, time
-from PyQt6.QtWidgets import QPushButton, QMessageBox
+from PySide6.QtWidgets import QPushButton, QMessageBox
 
 matplotlib.use('QtAgg')
 
-from PyQt6 import QtWidgets, uic
+from PySide6 import QtWidgets
 
-from PyQt6.QtCore import (
+from PySide6.QtCore import (
     QSettings,
     Qt,
     QSize,
@@ -19,7 +19,7 @@ from PyQt6.QtCore import (
     QTimer,
 )
 
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
@@ -33,6 +33,8 @@ from gui.internal_r import InternalR
 from gui.log_control import LogControl
 from sys import argv
 from gui.email_settings import EmailSettings
+from gui.ui_main import Ui_MainWindow
+from gui.ui_settings import Ui_settingsTab
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -46,12 +48,17 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
 
-        uic.loadUi('gui/main.ui', self)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        for name, value in vars(self.ui).items():
+            setattr(self, name, value)
         self.load_settings()
 
         self.plot_placeholder.setLayout(self.plot_layout())
         self.map_controls()
-        self.tab2 = uic.loadUi("gui/settings.ui")
+        self.tab2 = QtWidgets.QWidget()
+        self.settings_ui = Ui_settingsTab()
+        self.settings_ui.setupUi(self.tab2)
         self.logControl = LogControl()
         self.swCCCV = SwCCCV()
         self.internal_r = InternalR()

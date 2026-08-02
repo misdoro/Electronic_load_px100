@@ -1,14 +1,17 @@
-from PyQt6 import uic
-from PyQt6.QtCore import QSettings
-from PyQt6.QtWidgets import QGroupBox
+from PySide6.QtCore import QSettings
+from PySide6.QtWidgets import QGroupBox
 
 from instruments.instrument import Instrument
+from gui.ui_swcccv import Ui_SwCCCV
 
 
 class SwCCCV(QGroupBox):
     def __init__(self, *args, **kwargs):
         super(SwCCCV, self).__init__(*args, **kwargs)
-        uic.loadUi("gui/swcccv.ui", self)
+        self.ui = Ui_SwCCCV()
+        self.ui.setupUi(self)
+        for name, value in vars(self.ui).items():
+            setattr(self, name, value)
         self._load_settings()
         self.reset()
 
