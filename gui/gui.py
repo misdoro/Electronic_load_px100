@@ -1,10 +1,13 @@
 import matplotlib
 import smtplib
 import os
+import sys
+from pathlib import Path
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, time
 from PySide6.QtWidgets import QPushButton, QMessageBox
+from PySide6.QtGui import QIcon
 
 matplotlib.use('QtAgg')
 
@@ -34,6 +37,12 @@ from sys import argv
 from gui.email_settings import EmailSettings
 from gui.ui_main import Ui_MainWindow
 from gui.ui_settings import Ui_settingsTab
+
+
+def _asset_path(filename):
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return str(Path(sys._MEIPASS) / "assets" / filename)
+    return str(Path(__file__).resolve().parent.parent / "assets" / filename)
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -568,7 +577,12 @@ Test plot is attached.
 class GUI:
     def __init__(self, backend):
         self.app = QtWidgets.QApplication(argv)
+        icon = QIcon(_asset_path("battery_curve.ico"))
+        if not icon.isNull():
+            self.app.setWindowIcon(icon)
         self.window = MainWindow()
+        if not icon.isNull():
+            self.window.setWindowIcon(icon)
         self.window.set_backend(backend)
 
     def run(self):

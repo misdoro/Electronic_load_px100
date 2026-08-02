@@ -4,7 +4,7 @@ a = Analysis(
     ['main.py'],
     pathex=['./'],
     binaries=[],
-    datas=[],
+    datas=[('assets/*', 'assets')],
     hiddenimports=['pyvisa_py', 'serial'],
     hookspath=[],
     runtime_hooks=[],
@@ -23,6 +23,7 @@ exe = EXE(
     strip=False,
     upx=True,
     console=True,
+    icon='assets/battery_curve.ico',
 )
 coll = COLLECT(
     exe,
