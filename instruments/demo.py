@@ -18,6 +18,7 @@ class DemoPX100(Instrument):
         self.port = "SIM"
         self._start_voltage = 4.2
         self._voltage_drop_per_ah = 0.55
+        self._source_internal_resistance_ohm = 0.150
         self._sim_elapsed_s = 0.0
         self._last_tick = monotonic()
         self._timer_seconds = 0
@@ -38,9 +39,10 @@ class DemoPX100(Instrument):
             dt_hours = dt / 3600.0
             self.data['current'] = set_current
             self.data['cap_ah'] += set_current * dt_hours
+            open_circuit_voltage = self._start_voltage - self.data['cap_ah'] * self._voltage_drop_per_ah
             self.data['voltage'] = max(
                 self.data['set_voltage'],
-                self._start_voltage - self.data['cap_ah'] * self._voltage_drop_per_ah,
+                open_circuit_voltage - self.data['current'] * self._source_internal_resistance_ohm,
             )
             self.data['cap_wh'] += self.data['voltage'] * set_current * dt_hours
             self.data['temp'] = round(min(55.0, 25.0 + set_current * 3.0 + self.data['cap_ah'] * 0.5), 1)
@@ -53,6 +55,7 @@ class DemoPX100(Instrument):
                 self.data['current'] = 0.0
         else:
             self.data['current'] = 0.0
+            self.data['voltage'] = self._start_voltage - self.data['cap_ah'] * self._voltage_drop_per_ah
 
         self.data['time'] = self._seconds_to_time(self._sim_elapsed_s)
         self.data['set_timer'] = self._seconds_to_time(self._timer_seconds)
