@@ -8,10 +8,10 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        python_arch: [ x64, x86 ]
+        python_arch: [ x64 ]
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
     - name: Set up Python 3.14
       uses: actions/setup-python@v4
       with:
@@ -41,7 +41,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Download installer artifacts
         uses: actions/download-artifact@v8
       - name: List files
