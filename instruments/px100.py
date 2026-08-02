@@ -101,7 +101,7 @@ class PX100(Instrument):
             'is_on': 0.,
             'voltage': 0.,
             'current': 0.,
-            'time': time(0),
+            'time': 0,
             'cap_ah': 0.,
             'cap_wh': 0.,
             'temp': 0,
@@ -189,11 +189,16 @@ class PX100(Instrument):
         except:
             mult = 1000.
 
-        if (command == PX100.TIME or command == PX100.TIMER):
+        if command == PX100.TIME:
             hh = ret[2]
             mm = ret[3]
             ss = ret[4]
-            return time(hh, mm, ss)  #'{:02d}:{:02d}:{:02d}'.format(hh, mm, ss)
+            return hh * 3600 + mm * 60 + ss
+        elif command == PX100.TIMER:
+            hh = ret[2]
+            mm = ret[3]
+            ss = ret[4]
+            return time(hh % 24, mm % 60, ss % 60)
         else:
             return int.from_bytes(ret[2:5], byteorder='big') / mult
 

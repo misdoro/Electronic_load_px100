@@ -1,13 +1,13 @@
 from datetime import datetime
 from os import path
 
-from PyQt5 import uic
-from PyQt5.QtCore import QAbstractTableModel, QModelIndex, QSettings, Qt
-from PyQt5.QtWidgets import QGroupBox, QHeaderView
+from PySide6.QtCore import QAbstractTableModel, QModelIndex, QSettings, Qt
+from PySide6.QtWidgets import QGroupBox, QHeaderView
 from pandas import DataFrame
 import pandas as pd
 
 from instruments.instrument import Instrument
+from gui.ui_internal_r import Ui_is_enabled
 
 MODE_IDLE = 0
 MODE_PREPARE = 1
@@ -51,7 +51,7 @@ class InternalRTableModel(QAbstractTableModel):
         self.endInsertRows()
 
     def data(self, index, role):
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             value = self._data.iloc[index.row(), index.column()]
             return str(value)
 
@@ -60,6 +60,13 @@ class InternalRTableModel(QAbstractTableModel):
             filename = "{}_internal_r_{}.csv".format(prefix, datetime.now().strftime("%Y%m%d_%H%M%S"))
             full_path = path.join(basedir, filename)
             print(f"Saved internal R data: {path.basename(full_path)}")
+            self._data.drop_duplicates().to_csv(full_path)
+            return full_path
+        return None
+
+    def write_snapshot(self, basedir, prefix):
+        if self.rowCount(1):
+            full_path = path.join(basedir, f"{prefix}_internal_r_autosave.csv")
             self._data.drop_duplicates().to_csv(full_path)
             return full_path
         return None
@@ -76,23 +83,26 @@ class InternalRTableModel(QAbstractTableModel):
         return self._data.shape[1]
 
     def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.Orientation.Horizontal:
                 return str(self._data.columns[section])
 
-            if orientation == Qt.Vertical:
+            if orientation == Qt.Orientation.Vertical:
                 return str(self._data.index[section])
 
 
 class InternalR(QGroupBox):
     def __init__(self, *args, **kwargs):
         super(InternalR, self).__init__(*args, **kwargs)
-        uic.loadUi("gui/internal_r.ui", self)
+        self.ui = Ui_is_enabled()
+        self.ui.setupUi(self)
+        for name, value in vars(self.ui).items():
+            setattr(self, name, value)
         self.measurePeriod.valueChanged.connect(self.param_changed)
         self.tableModel = InternalRTableModel()
         self.resultsTable.setModel(self.tableModel)
         self.resultsTable.horizontalHeader().setSectionResizeMode(
-            QHeaderView.Stretch)
+            QHeaderView.ResizeMode.Stretch)
         self.load_settings()
         self.reset()
 
@@ -125,6 +135,9 @@ class InternalR(QGroupBox):
 
     def write(self, path, prefix):
         return self.tableModel.write(path, prefix)
+
+    def write_snapshot(self, path, prefix):
+        return self.tableModel.write_snapshot(path, prefix)
 
     def data_row(self, data, row):
         if not self.isChecked() or not self.v_period:

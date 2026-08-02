@@ -31,7 +31,7 @@ class DataStore:
         elif row.get('is_on') and (not hasattr(self, 'last_log_time') or 
                                    (current_time - self.last_log_time).total_seconds() > 60):
             should_log = True
-            print(f"{current_time.isoformat(sep=' ', timespec='seconds')} Running: {row['time']} - V={row['voltage']:.3f} I={row['current']:.3f} Ah={row['cap_ah']:.2f}")
+            print(f"{current_time.isoformat(sep=' ', timespec='seconds')} Running: {self.format_duration(row['time'])} - V={row['voltage']:.3f} I={row['current']:.3f} Ah={row['cap_ah']:.2f}")
         
         if should_log:
             self.last_log_time = current_time
@@ -59,8 +59,24 @@ class DataStore:
             print("No data to save")
             return None
 
+    def write_snapshot(self, basedir, prefix):
+        full_path = path.join(basedir, f"{prefix}_raw_autosave.csv")
+        export_rows = self.data.drop_duplicates()
+        if export_rows.shape[0]:
+            export_rows.to_csv(full_path)
+            return full_path
+        return None
+
     def plot(self, **args):
         return self.data.plot(**args)
 
     def lastval(self, key):
         return self.lastrow[key]
+
+    @staticmethod
+    def format_duration(total_seconds):
+        total = max(0, int(total_seconds))
+        hh = total // 3600
+        mm = (total % 3600) // 60
+        ss = total % 60
+        return f"{hh:02d}:{mm:02d}:{ss:02d}"

@@ -1,6 +1,5 @@
-from PyQt5 import uic
-from PyQt5.QtCore import QSettings
-from PyQt5.QtWidgets import QGroupBox, QMessageBox
+from PySide6.QtCore import QSettings
+from PySide6.QtWidgets import QGroupBox, QMessageBox
 import smtplib
 import os
 import tempfile
@@ -9,10 +8,15 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from datetime import datetime
 
+from gui.ui_email_settings import Ui_EmailSettings
+
 class EmailSettings(QGroupBox):
     def __init__(self, *args, **kwargs):
         super(EmailSettings, self).__init__(*args, **kwargs)
-        uic.loadUi("gui/email_settings.ui", self)
+        self.ui = Ui_EmailSettings()
+        self.ui.setupUi(self)
+        for name, value in vars(self.ui).items():
+            setattr(self, name, value)
 
         self.test_email_button.clicked.connect(self.send_test_email)
         self.load_settings()

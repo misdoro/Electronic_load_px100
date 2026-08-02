@@ -1,17 +1,19 @@
 import matplotlib
 import smtplib
 import os
-import tempfile
+import sys
+from pathlib import Path
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, time
-from PyQt5.QtWidgets import QPushButton, QMessageBox
+from PySide6.QtWidgets import QPushButton, QMessageBox
+from PySide6.QtGui import QIcon
 
-matplotlib.use('Qt5Agg')
+matplotlib.use('QtAgg')
 
-from PyQt5 import QtWidgets, uic
+from PySide6 import QtWidgets
 
-from PyQt5.QtCore import (
+from PySide6.QtCore import (
     QSettings,
     Qt,
     QSize,
@@ -19,11 +21,11 @@ from PyQt5.QtCore import (
     QTimer,
 )
 
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
 
 from matplotlib.figure import Figure
 
@@ -33,6 +35,20 @@ from gui.internal_r import InternalR
 from gui.log_control import LogControl
 from sys import argv
 from gui.email_settings import EmailSettings
+from gui.ui_main import Ui_MainWindow
+from gui.ui_settings import Ui_settingsTab
+
+
+def _asset_path(filename):
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return str(Path(sys._MEIPASS) / "assets" / filename)
+    return str(Path(__file__).resolve().parent.parent / "assets" / filename)
+
+
+def _icon_path():
+    if sys.platform == "darwin":
+        return _asset_path("battery_curve.png")
+    return _asset_path("battery_curve.ico")
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -46,12 +62,17 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
 
-        uic.loadUi('gui/main.ui', self)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        for name, value in vars(self.ui).items():
+            setattr(self, name, value)
         self.load_settings()
 
         self.plot_placeholder.setLayout(self.plot_layout())
         self.map_controls()
-        self.tab2 = uic.loadUi("gui/settings.ui")
+        self.tab2 = QtWidgets.QWidget()
+        self.settings_ui = Ui_settingsTab()
+        self.settings_ui.setupUi(self.tab2)
         self.logControl = LogControl()
         self.swCCCV = SwCCCV()
         self.internal_r = InternalR()
@@ -96,6 +117,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tab2.layout().addWidget(self.email_settings, 2, 0)
         self.tabs.addTab(self.tab2, "Settings")
         self.email_sent = False
+        self.last_autosave_time = None
         self.show()
 
     def plot_layout(self):
@@ -152,13 +174,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.readCurrent.setText("{:5.3f} A".format(current))
             self.readCapAH.setText("{:5.3f} AH".format(data.lastval('cap_ah')))
             self.readCapWH.setText("{:5.3f} WH".format(data.lastval('cap_wh')))
-            self.readTime.setText(data.lastval('time').strftime("%H:%M:%S"))
+            elapsed_seconds = data.lastval('time')
+            self.readTime.setText(self._format_duration(elapsed_seconds))
 
-            xlim = (time(0), max([time(0, 1, 0), data.lastval('time')]))
+            xlim = (0, max(60, elapsed_seconds))
             self.ax.cla()
             self.twinax.cla()
             data.plot(ax=self.ax, x='time', y=['voltage'], xlim=xlim)
             self.ax.legend(loc='center left')
+            self.ax.set_xlabel('Elapsed time, s')
             self.ax.set_ylabel('Voltage, V')
             self.ax.set_ylim(bottom=set_voltage)
             data.plot(ax=self.twinax, x='time', y=['current'], style='r')
@@ -178,6 +202,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Store current state for next comparison
             self.prev_is_on = row.get('is_on', False)
+            self._autosave_logs()
 
         else:
             # Handle case where data is None (communication error)
@@ -247,6 +272,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.backend.datastore.reset()
         self.backend.send_command({Instrument.COMMAND_RESET: 0.0})
         self.email_sent = False
+        self.last_autosave_time = None
 
         # Reset the test button state
         self.test_running = False
@@ -284,19 +310,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 print("Invalid capacity values, skipping email")
                 return
 
-            cell_label = self.cellLabel.text().replace(" ", "_")  # Replace spaces with underscores
-            base_path = self.logControl.full_path
-            log_path = os.path.join(base_path, "logs")
-
-            print(f"Writing logs for {cell_label} to {log_path}")
-
-            # Create the log directory if it doesn't exist
-            try:
-                os.makedirs(log_path, exist_ok=True)
-                print(f"Ensured log directory exists: {log_path}")
-            except Exception as e:
-                print(f"Error creating log directory: {e}")
+            context = self._log_context()
+            if not context:
                 return
+            cell_label, log_path = context
+            print(f"Writing logs for {cell_label} to {log_path}")
 
             # Write logs and get file paths
             internal_r_file = self.internal_r.write(log_path, cell_label)
@@ -310,9 +328,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 return
 
             # Save the current plot as an image with cell label
-            plot_filename = f"{cell_label}_plot.png"
-            fd, plot_file = tempfile.mkstemp(suffix=f'_{plot_filename}')
-            os.close(fd)
+            plot_filename = "{}_plot_{}.png".format(
+                cell_label, datetime.now().strftime("%Y%m%d_%H%M%S"))
+            plot_file = os.path.join(log_path, plot_filename)
             self.canvas.fig.savefig(plot_file, dpi=100)
             print(f"Plot saved to {plot_file}")
 
@@ -326,7 +344,7 @@ Results:
 - Final Voltage: {voltage:.3f} V
 - Final Current: {current:.3f} A
 - Capacity: {cap_ah:.3f} AH / {cap_wh:.3f} WH
-- Test Duration: {test_time.strftime("%H:%M:%S")}
+- Test Duration: {self._format_duration(test_time)}
 
 The test data files and plot are attached.
 """
@@ -335,14 +353,50 @@ The test data files and plot are attached.
             if attachments:
                 print(f"Sending email with {len(attachments)} attachments")
                 self.send_email_notification(subject, message, attachments)
-
-                # Clean up the temporary file
-                try:
-                    os.remove(plot_file)
-                except Exception as e:
-                    print(f"Error removing temp file: {e}")
             else:
                 print("No attachments available, skipping email")
+
+    def _log_context(self):
+        cell_label = self.cellLabel.text().replace(" ", "_")
+        base_path = self.logControl.full_path
+        log_path = os.path.join(base_path, "logs")
+        try:
+            os.makedirs(log_path, exist_ok=True)
+        except Exception as e:
+            print(f"Error creating log directory: {e}")
+            return None
+        return cell_label, log_path
+
+    def _autosave_logs(self):
+        if not self.logControl.isChecked():
+            return
+        interval = self.logControl.autosave_interval_seconds()
+        if interval <= 0:
+            return
+        if not self.test_running:
+            return
+
+        now = datetime.now()
+        if self.last_autosave_time:
+            elapsed = (now - self.last_autosave_time).total_seconds()
+            if elapsed < interval:
+                return
+
+        if not self.backend.datastore or self.backend.datastore.data.empty:
+            return
+
+        context = self._log_context()
+        if not context:
+            return
+        cell_label, log_path = context
+
+        data_file = self.backend.datastore.write_snapshot(log_path, cell_label)
+        internal_r_file = self.internal_r.write_snapshot(log_path, cell_label)
+        if data_file:
+            self.last_autosave_time = now
+            data_name = os.path.basename(data_file)
+            internal_r_name = os.path.basename(internal_r_file) if internal_r_file else "none"
+            print(f"Autosaved CSV: data={data_name} internal_r={internal_r_name}")
 
     def save_settings(self):
         settings = QSettings()
@@ -427,13 +481,16 @@ The test data files and plot are attached.
                     "Please configure email settings in the Settings tab before sending.")
                 return
 
-            # Create temporary files for attachments
+            # Create attachment files
             attachments = []
 
             # Save plot
-            plot_filename = f"{cell_label.replace(' ', '_')}_plot.png"
-            fd, plot_file = tempfile.mkstemp(suffix=f'_{plot_filename}')
-            os.close(fd)
+            cell_label_safe = cell_label.replace(' ', '_')
+            log_path = os.path.join(self.logControl.full_path, "logs")
+            os.makedirs(log_path, exist_ok=True)
+            plot_filename = "{}_plot_{}.png".format(
+                cell_label_safe, datetime.now().strftime("%Y%m%d_%H%M%S"))
+            plot_file = os.path.join(log_path, plot_filename)
             self.canvas.fig.savefig(plot_file, dpi=100)
             attachments.append(plot_file)
 
@@ -445,7 +502,7 @@ Results:
 - Current Voltage: {voltage:.3f} V
 - Current Current: {current:.3f} A
 - Capacity: {cap_ah:.3f} AH / {cap_wh:.3f} WH
-- Test Duration: {test_time.strftime("%H:%M:%S")}
+- Test Duration: {self._format_duration(test_time)}
 
 Test plot is attached.
 """
@@ -456,13 +513,6 @@ Test plot is attached.
             QMessageBox.information(self, "Success",
                 f"Test results email sent successfully to {recipient}!")
 
-            # Clean up temporary files
-            for file_path in attachments:
-                try:
-                    os.remove(file_path)
-                except:
-                    pass
-
         except Exception as e:
             QMessageBox.critical(self, "Error",
                 f"Failed to send email:\n{str(e)}")
@@ -472,6 +522,7 @@ Test plot is attached.
         if not self.test_running:
             # Start the test
             self.test_running = True
+            self.last_autosave_time = None
             self.start_test_button.setText("Stop Test")
             self.start_test_button.setStyleSheet(self._get_stop_button_style())
             self.backend.send_command({Instrument.COMMAND_ENABLE: True})
@@ -520,10 +571,25 @@ Test plot is attached.
             }
         """
 
+    @staticmethod
+    def _format_duration(total_seconds):
+        total = max(0, int(total_seconds))
+        hh = total // 3600
+        mm = (total % 3600) // 60
+        ss = total % 60
+        return f"{hh:02d}:{mm:02d}:{ss:02d}"
+
 
 class GUI:
     def __init__(self, backend):
-        app = QtWidgets.QApplication(argv)
+        self.app = QtWidgets.QApplication(argv)
+        icon = QIcon(_icon_path())
+        if not icon.isNull():
+            self.app.setWindowIcon(icon)
         self.window = MainWindow()
+        if not icon.isNull():
+            self.window.setWindowIcon(icon)
         self.window.set_backend(backend)
-        app.exec_()
+
+    def run(self):
+        self.app.exec()

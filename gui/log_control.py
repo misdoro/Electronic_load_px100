@@ -1,14 +1,18 @@
 from os import path
 
-from PyQt5 import uic
-from PyQt5.QtCore import QSettings
-from PyQt5.QtWidgets import QGroupBox, QFileDialog
+from PySide6.QtCore import QSettings
+from PySide6.QtWidgets import QGroupBox, QFileDialog
+
+from gui.ui_log_control import Ui_LogControl
 
 
 class LogControl(QGroupBox):
     def __init__(self, *args, **kwargs):
         super(LogControl, self).__init__(*args, **kwargs)
-        uic.loadUi("gui/log_control.ui", self)
+        self.ui = Ui_LogControl()
+        self.ui.setupUi(self)
+        for name, value in vars(self.ui).items():
+            setattr(self, name, value)
         self.home = path.expanduser('~')
         self._load_settings()
         self._map_controls()
@@ -18,6 +22,7 @@ class LogControl(QGroupBox):
 
         settings.setValue("LogControl/enabled", self.isChecked())
         settings.setValue("LogControl/path", self.full_path)
+        settings.setValue("LogControl/autosave_minutes", self.autosaveIntervalMin.value())
 
         settings.sync()
 
@@ -29,7 +34,12 @@ class LogControl(QGroupBox):
         settings = QSettings()
         self.setChecked(settings.value("LogControl/enabled", False, type=bool))
         self.full_path = settings.value("LogControl/path", self.home)
+        self.autosaveIntervalMin.setValue(
+            settings.value("LogControl/autosave_minutes", 5, type=int))
         self._display_path(self.full_path)
+
+    def autosave_interval_seconds(self):
+        return max(0, int(self.autosaveIntervalMin.value())) * 60
 
     def _path_changed(self):
         text = self.logPath.text()
@@ -44,7 +54,7 @@ class LogControl(QGroupBox):
 
     def _select_path(self):
         dialog = self.dialog()
-        if dialog.exec_():
+        if dialog.exec():
             s_path = path.normpath(dialog.selectedFiles()[0])
             if path.isdir(s_path):
                 self._display_path(s_path)
