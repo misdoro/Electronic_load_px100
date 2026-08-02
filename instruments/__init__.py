@@ -36,33 +36,34 @@ class Instruments:
         for i in self.rm.list_resources():
             print(i)
             try:
-                inst = self.rm.open_resource(i)
+                resource = self.rm.open_resource(i)
             except Exception:
                 print("err opening instrument")
                 continue
 
-            if not isinstance(inst, visa.resources.Resource):
+            if not isinstance(resource, visa.resources.Resource):
                 continue
 
             try:
                 from instruments import px100
-                driver = px100.PX100(inst)  #Todo: loop over drivers if multiple
+                driver = px100.PX100(resource)  #Todo: loop over drivers if multiple
                 if driver.probe():
                     self.instruments.append(driver)
                     print("found " + driver.name)
                 else:
                     print("ko")
-            except Exception as inst:
-                print(type(inst))  # the exception instance
-                print(inst.args)  # arguments stored in .args
-                print(inst)
+                    resource.close()
+            except Exception as exc:
+                print(type(exc))  # the exception instance
+                print(exc.args)  # arguments stored in .args
+                print(exc)
                 print("err")
                 try:
-                    inst.close()
-                except Exception as inst:
-                    print(type(inst))  # the exception instance
-                    print(inst.args)  # arguments stored in .args
-                    print(inst)
+                    resource.close()
+                except Exception as close_exc:
+                    print(type(close_exc))  # the exception instance
+                    print(close_exc.args)  # arguments stored in .args
+                    print(close_exc)
                     print("no close")
 
         else:
