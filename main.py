@@ -1,3 +1,4 @@
+from multiprocessing import freeze_support
 from signal import signal, SIGTERM, SIGINT
 from sys import exit
 
@@ -63,4 +64,5 @@ class Main:
 
 
 if __name__ == "__main__":
+    freeze_support()
     Main()
