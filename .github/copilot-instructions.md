@@ -39,5 +39,5 @@
 
 ## Practical constraints
 - App is stateful and event-driven; avoid race-prone cross-thread UI access.
-- This project currently targets older dependency constraints (`pandas < 2.0`, PyQt5, pyvisa/pyserial stack).
+- This project supports Python 3.14 and uses modern pandas (`>=2.2`) with the PyQt5/pyvisa/pyserial stack.
 - Device availability is not guaranteed during development; when adding logic, keep graceful handling for missing instruments.
