@@ -14,6 +14,7 @@ See the [v2.70 binary Protocol description](protocol_PX-100_2_70.md)
 - Control all load features
 - Voltage and Current plot vs time
 - Save logs to CSV at exit and at device reset
+- Configurable periodic CSV autosave to reduce data loss risk on crashes/power loss
 - Internal resistance measurement at user-defined voltage steps
 - Software-defined CC-CV discharge to speed up capacity tests for low current discharge
 
@@ -33,6 +34,8 @@ python3 main.py
 to execute the control program.
 
 If no PX-100 device is connected, the app now automatically starts with a built-in demo instrument so the UI and logging flow can be tested without hardware.
+
+In **Settings → Log to file**, use **Autosave interval** to control periodic CSV snapshots during a running test (`0` = disabled).
 
 ## Updating Qt UI files
 

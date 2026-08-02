@@ -17,13 +17,13 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFormLayout, QGroupBox, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QSizePolicy,
-    QWidget)
+    QSpinBox, QWidget)
 
 class Ui_LogControl(object):
     def setupUi(self, LogControl):
         if not LogControl.objectName():
             LogControl.setObjectName(u"LogControl")
-        LogControl.resize(400, 82)
+        LogControl.resize(400, 113)
         LogControl.setCheckable(True)
         self.formLayout = QFormLayout(LogControl)
         self.formLayout.setObjectName(u"formLayout")
@@ -60,6 +60,18 @@ class Ui_LogControl(object):
 
         self.formLayout.setLayout(0, QFormLayout.ItemRole.FieldRole, self.horizontalLayout)
 
+        self.labelAutosave = QLabel(LogControl)
+        self.labelAutosave.setObjectName(u"labelAutosave")
+
+        self.formLayout.setWidget(1, QFormLayout.ItemRole.LabelRole, self.labelAutosave)
+
+        self.autosaveIntervalMin = QSpinBox(LogControl)
+        self.autosaveIntervalMin.setObjectName(u"autosaveIntervalMin")
+        self.autosaveIntervalMin.setMaximum(1440)
+        self.autosaveIntervalMin.setValue(5)
+
+        self.formLayout.setWidget(1, QFormLayout.ItemRole.FieldRole, self.autosaveIntervalMin)
+
 
         self.retranslateUi(LogControl)
 
@@ -72,5 +84,8 @@ class Ui_LogControl(object):
         self.label.setText(QCoreApplication.translate("LogControl", u"Log path", None))
         self.pathExists.setText("")
         self.selectLogPath.setText(QCoreApplication.translate("LogControl", u"...", None))
+        self.labelAutosave.setText(QCoreApplication.translate("LogControl", u"Autosave interval", None))
+        self.autosaveIntervalMin.setSpecialValueText(QCoreApplication.translate("LogControl", u"Disabled", None))
+        self.autosaveIntervalMin.setSuffix(QCoreApplication.translate("LogControl", u" min", None))
     # retranslateUi
 

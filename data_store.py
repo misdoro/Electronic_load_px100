@@ -59,6 +59,14 @@ class DataStore:
             print("No data to save")
             return None
 
+    def write_snapshot(self, basedir, prefix):
+        full_path = path.join(basedir, f"{prefix}_raw_autosave.csv")
+        export_rows = self.data.drop_duplicates()
+        if export_rows.shape[0]:
+            export_rows.to_csv(full_path)
+            return full_path
+        return None
+
     def plot(self, **args):
         return self.data.plot(**args)
 

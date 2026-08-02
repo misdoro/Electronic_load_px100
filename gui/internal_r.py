@@ -64,6 +64,13 @@ class InternalRTableModel(QAbstractTableModel):
             return full_path
         return None
 
+    def write_snapshot(self, basedir, prefix):
+        if self.rowCount(1):
+            full_path = path.join(basedir, f"{prefix}_internal_r_autosave.csv")
+            self._data.drop_duplicates().to_csv(full_path)
+            return full_path
+        return None
+
     def reset(self):
         self.beginResetModel()
         self._data = DataFrame(columns=['step', 'r_a', 'r_b'])
@@ -128,6 +135,9 @@ class InternalR(QGroupBox):
 
     def write(self, path, prefix):
         return self.tableModel.write(path, prefix)
+
+    def write_snapshot(self, path, prefix):
+        return self.tableModel.write_snapshot(path, prefix)
 
     def data_row(self, data, row):
         if not self.isChecked() or not self.v_period:

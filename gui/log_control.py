@@ -22,6 +22,7 @@ class LogControl(QGroupBox):
 
         settings.setValue("LogControl/enabled", self.isChecked())
         settings.setValue("LogControl/path", self.full_path)
+        settings.setValue("LogControl/autosave_minutes", self.autosaveIntervalMin.value())
 
         settings.sync()
 
@@ -33,7 +34,12 @@ class LogControl(QGroupBox):
         settings = QSettings()
         self.setChecked(settings.value("LogControl/enabled", False, type=bool))
         self.full_path = settings.value("LogControl/path", self.home)
+        self.autosaveIntervalMin.setValue(
+            settings.value("LogControl/autosave_minutes", 5, type=int))
         self._display_path(self.full_path)
+
+    def autosave_interval_seconds(self):
+        return max(0, int(self.autosaveIntervalMin.value())) * 60
 
     def _path_changed(self):
         text = self.logPath.text()

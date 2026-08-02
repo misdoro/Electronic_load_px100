@@ -102,6 +102,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tab2.layout().addWidget(self.email_settings, 2, 0)
         self.tabs.addTab(self.tab2, "Settings")
         self.email_sent = False
+        self.last_autosave_time = None
         self.show()
 
     def plot_layout(self):
@@ -186,6 +187,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Store current state for next comparison
             self.prev_is_on = row.get('is_on', False)
+            self._autosave_logs()
 
         else:
             # Handle case where data is None (communication error)
@@ -255,6 +257,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.backend.datastore.reset()
         self.backend.send_command({Instrument.COMMAND_RESET: 0.0})
         self.email_sent = False
+        self.last_autosave_time = None
 
         # Reset the test button state
         self.test_running = False
@@ -292,19 +295,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 print("Invalid capacity values, skipping email")
                 return
 
-            cell_label = self.cellLabel.text().replace(" ", "_")  # Replace spaces with underscores
-            base_path = self.logControl.full_path
-            log_path = os.path.join(base_path, "logs")
-
-            print(f"Writing logs for {cell_label} to {log_path}")
-
-            # Create the log directory if it doesn't exist
-            try:
-                os.makedirs(log_path, exist_ok=True)
-                print(f"Ensured log directory exists: {log_path}")
-            except Exception as e:
-                print(f"Error creating log directory: {e}")
+            context = self._log_context()
+            if not context:
                 return
+            cell_label, log_path = context
+            print(f"Writing logs for {cell_label} to {log_path}")
 
             # Write logs and get file paths
             internal_r_file = self.internal_r.write(log_path, cell_label)
@@ -345,6 +340,48 @@ The test data files and plot are attached.
                 self.send_email_notification(subject, message, attachments)
             else:
                 print("No attachments available, skipping email")
+
+    def _log_context(self):
+        cell_label = self.cellLabel.text().replace(" ", "_")
+        base_path = self.logControl.full_path
+        log_path = os.path.join(base_path, "logs")
+        try:
+            os.makedirs(log_path, exist_ok=True)
+        except Exception as e:
+            print(f"Error creating log directory: {e}")
+            return None
+        return cell_label, log_path
+
+    def _autosave_logs(self):
+        if not self.logControl.isChecked():
+            return
+        interval = self.logControl.autosave_interval_seconds()
+        if interval <= 0:
+            return
+        if not self.test_running:
+            return
+
+        now = datetime.now()
+        if self.last_autosave_time:
+            elapsed = (now - self.last_autosave_time).total_seconds()
+            if elapsed < interval:
+                return
+
+        if not self.backend.datastore or self.backend.datastore.data.empty:
+            return
+
+        context = self._log_context()
+        if not context:
+            return
+        cell_label, log_path = context
+
+        data_file = self.backend.datastore.write_snapshot(log_path, cell_label)
+        internal_r_file = self.internal_r.write_snapshot(log_path, cell_label)
+        if data_file:
+            self.last_autosave_time = now
+            data_name = os.path.basename(data_file)
+            internal_r_name = os.path.basename(internal_r_file) if internal_r_file else "none"
+            print(f"Autosaved CSV: data={data_name} internal_r={internal_r_name}")
 
     def save_settings(self):
         settings = QSettings()
@@ -470,6 +507,7 @@ Test plot is attached.
         if not self.test_running:
             # Start the test
             self.test_running = True
+            self.last_autosave_time = None
             self.start_test_button.setText("Stop Test")
             self.start_test_button.setStyleSheet(self._get_stop_button_style())
             self.backend.send_command({Instrument.COMMAND_ENABLE: True})
