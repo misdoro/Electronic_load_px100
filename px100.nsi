@@ -43,7 +43,7 @@ Section "Program files (Required)"
   SetOutPath $InstDir
   WriteUninstaller "$InstDir\Uninst.exe"
   WriteRegStr HKCU "${REGPATH_UNINSTSUBKEY}" "DisplayName" "${NAME}"
-  WriteRegStr HKCU "${REGPATH_UNINSTSUBKEY}" "DisplayIcon" "$InstDir\MyApp.exe,0"
+  WriteRegStr HKCU "${REGPATH_UNINSTSUBKEY}" "DisplayIcon" "$InstDir\px100.exe,0"
   WriteRegStr HKCU "${REGPATH_UNINSTSUBKEY}" "UninstallString" '"$InstDir\Uninst.exe"'
   WriteRegDWORD HKCU "${REGPATH_UNINSTSUBKEY}" "NoModify" 1
   WriteRegDWORD HKCU "${REGPATH_UNINSTSUBKEY}" "NoRepair" 1
@@ -59,8 +59,7 @@ Section -Uninstall
   ${UnpinShortcut} "$SMPrograms\${NAME}.lnk"
   Delete "$SMPrograms\${NAME}.lnk"
 
-  Delete "$InstDir\MyApp.exe"
   Delete "$InstDir\Uninst.exe"
-  RMDir "$InstDir"
+  RMDir /r "$InstDir"
   DeleteRegKey HKCU "${REGPATH_UNINSTSUBKEY}"
 SectionEnd

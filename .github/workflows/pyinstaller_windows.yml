@@ -13,10 +13,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v7
     - name: Set up Python 3.14
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.14'
         architecture: ${{ matrix.python_arch }}
+    - name: Install NSIS
+      run: |
+        choco install nsis --no-progress -y
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -27,8 +30,9 @@ jobs:
         pyinstaller px100.spec
     - name: Build NSIS installer package
       run: |
-        makensis -VERSION
-        makensis "/XOutFile Battery-Tester-PX100-${{matrix.python_arch}}.exe" px100.nsi
+        $makensis = "${env:ProgramFiles(x86)}\NSIS\makensis.exe"
+        & $makensis -VERSION
+        & $makensis "/XOutFile Battery-Tester-PX100-${{matrix.python_arch}}.exe" "px100.nsi"
     - name: Upload installer artifact
       uses: actions/upload-artifact@v7
       with:
@@ -65,13 +69,4 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: Battery-Tester-PX100-x64.exe
           asset_name: Battery-Tester-PX100-x64.exe
-          asset_content_type: application/exe
-      - name: Upload win32 binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: Battery-Tester-PX100-x86.exe
-          asset_name: Battery-Tester-PX100-x86.exe
           asset_content_type: application/exe
