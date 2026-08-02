@@ -32,3 +32,4 @@ python3 main.py
 ```
 to execute the control program.
 
+If no PX-100 device is connected, the app now automatically starts with a built-in demo instrument so the UI and logging flow can be tested without hardware.
