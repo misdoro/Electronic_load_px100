@@ -54,9 +54,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller
           pip install -r requirements.txt
+      - name: Build macOS icon file
+        run: |
+          ICONSET="assets/battery_curve.iconset"
+          mkdir -p "$ICONSET"
+          sips -z 16 16   assets/battery_curve.png --out "$ICONSET/icon_16x16.png"
+          sips -z 32 32   assets/battery_curve.png --out "$ICONSET/icon_16x16@2x.png"
+          sips -z 32 32   assets/battery_curve.png --out "$ICONSET/icon_32x32.png"
+          sips -z 64 64   assets/battery_curve.png --out "$ICONSET/icon_32x32@2x.png"
+          sips -z 128 128 assets/battery_curve.png --out "$ICONSET/icon_128x128.png"
+          sips -z 256 256 assets/battery_curve.png --out "$ICONSET/icon_128x128@2x.png"
+          sips -z 256 256 assets/battery_curve.png --out "$ICONSET/icon_256x256.png"
+          sips -z 512 512 assets/battery_curve.png --out "$ICONSET/icon_256x256@2x.png"
+          sips -z 512 512 assets/battery_curve.png --out "$ICONSET/icon_512x512.png"
+          sips -z 1024 1024 assets/battery_curve.png --out "$ICONSET/icon_512x512@2x.png"
+          iconutil -c icns "$ICONSET" -o assets/battery_curve.icns
       - name: Build app bundle
         run: |
-          pyinstaller --noconfirm --windowed --name "Battery Tester PX100" --hidden-import pyvisa_py --hidden-import serial main.py
+          pyinstaller --noconfirm --windowed --name "Battery Tester PX100" --icon assets/battery_curve.icns --add-data "assets:assets" --hidden-import pyvisa_py --hidden-import serial main.py
       - name: Build DMG
         run: |
           APP_NAME="Battery Tester PX100"

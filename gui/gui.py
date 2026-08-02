@@ -45,6 +45,12 @@ def _asset_path(filename):
     return str(Path(__file__).resolve().parent.parent / "assets" / filename)
 
 
+def _icon_path():
+    if sys.platform == "darwin":
+        return _asset_path("battery_curve.png")
+    return _asset_path("battery_curve.ico")
+
+
 class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
@@ -577,7 +583,7 @@ Test plot is attached.
 class GUI:
     def __init__(self, backend):
         self.app = QtWidgets.QApplication(argv)
-        icon = QIcon(_asset_path("battery_curve.ico"))
+        icon = QIcon(_icon_path())
         if not icon.isNull():
             self.app.setWindowIcon(icon)
         self.window = MainWindow()

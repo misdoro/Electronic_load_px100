@@ -14,12 +14,12 @@ class Main:
         QCoreApplication.setOrganizationName('github.com/misdoro')
         QCoreApplication.setApplicationName('Battery tester')
         self.terminating = False
+        self.datastore = DataStore()
+        self.data_receivers = set()
         self.threadpool = QThreadPool()
         self.instr_thread()
-        self.datastore = DataStore()
         signal(SIGTERM, self.terminate_process)
         signal(SIGINT, self.terminate_process)
-        self.data_receivers = set()
         self.gui = GUI(self)
         self.gui.run()
 
