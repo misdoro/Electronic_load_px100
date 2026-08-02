@@ -152,13 +152,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.readCurrent.setText("{:5.3f} A".format(current))
             self.readCapAH.setText("{:5.3f} AH".format(data.lastval('cap_ah')))
             self.readCapWH.setText("{:5.3f} WH".format(data.lastval('cap_wh')))
-            self.readTime.setText(data.lastval('time').strftime("%H:%M:%S"))
+            elapsed_seconds = data.lastval('time')
+            self.readTime.setText(self._format_duration(elapsed_seconds))
 
-            xlim = (time(0), max([time(0, 1, 0), data.lastval('time')]))
+            xlim = (0, max(60, elapsed_seconds))
             self.ax.cla()
             self.twinax.cla()
             data.plot(ax=self.ax, x='time', y=['voltage'], xlim=xlim)
             self.ax.legend(loc='center left')
+            self.ax.set_xlabel('Elapsed time, s')
             self.ax.set_ylabel('Voltage, V')
             self.ax.set_ylim(bottom=set_voltage)
             data.plot(ax=self.twinax, x='time', y=['current'], style='r')
@@ -326,7 +328,7 @@ Results:
 - Final Voltage: {voltage:.3f} V
 - Final Current: {current:.3f} A
 - Capacity: {cap_ah:.3f} AH / {cap_wh:.3f} WH
-- Test Duration: {test_time.strftime("%H:%M:%S")}
+- Test Duration: {self._format_duration(test_time)}
 
 The test data files and plot are attached.
 """
@@ -445,7 +447,7 @@ Results:
 - Current Voltage: {voltage:.3f} V
 - Current Current: {current:.3f} A
 - Capacity: {cap_ah:.3f} AH / {cap_wh:.3f} WH
-- Test Duration: {test_time.strftime("%H:%M:%S")}
+- Test Duration: {self._format_duration(test_time)}
 
 Test plot is attached.
 """
@@ -519,6 +521,14 @@ Test plot is attached.
                 background-color: rgba(255, 160, 60, 0.9);
             }
         """
+
+    @staticmethod
+    def _format_duration(total_seconds):
+        total = max(0, int(total_seconds))
+        hh = total // 3600
+        mm = (total % 3600) // 60
+        ss = total % 60
+        return f"{hh:02d}:{mm:02d}:{ss:02d}"
 
 
 class GUI:

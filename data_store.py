@@ -31,7 +31,7 @@ class DataStore:
         elif row.get('is_on') and (not hasattr(self, 'last_log_time') or 
                                    (current_time - self.last_log_time).total_seconds() > 60):
             should_log = True
-            print(f"{current_time.isoformat(sep=' ', timespec='seconds')} Running: {row['time']} - V={row['voltage']:.3f} I={row['current']:.3f} Ah={row['cap_ah']:.2f}")
+            print(f"{current_time.isoformat(sep=' ', timespec='seconds')} Running: {self.format_duration(row['time'])} - V={row['voltage']:.3f} I={row['current']:.3f} Ah={row['cap_ah']:.2f}")
         
         if should_log:
             self.last_log_time = current_time
@@ -64,3 +64,11 @@ class DataStore:
 
     def lastval(self, key):
         return self.lastrow[key]
+
+    @staticmethod
+    def format_duration(total_seconds):
+        total = max(0, int(total_seconds))
+        hh = total // 3600
+        mm = (total % 3600) // 60
+        ss = total % 60
+        return f"{hh:02d}:{mm:02d}:{ss:02d}"

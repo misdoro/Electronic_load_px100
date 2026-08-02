@@ -57,7 +57,7 @@ class DemoPX100(Instrument):
             self.data['current'] = 0.0
             self.data['voltage'] = self._start_voltage - self.data['cap_ah'] * self._voltage_drop_per_ah
 
-        self.data['time'] = self._seconds_to_time(self._sim_elapsed_s)
+        self.data['time'] = int(round(self._sim_elapsed_s))
         self.data['set_timer'] = self._seconds_to_time(self._timer_seconds)
         return self.data.copy()
 
@@ -95,7 +95,7 @@ class DemoPX100(Instrument):
             'is_on': 0.0,
             'voltage': self._start_voltage,
             'current': 0.0,
-            'time': time(0, 0, 0),
+            'time': 0,
             'cap_ah': 0.0,
             'cap_wh': 0.0,
             'temp': 25.0,
