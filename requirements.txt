@@ -1,7 +1,7 @@
 matplotlib
 numpy
 pandas>=2.2
-pyqt5
+pyqt6
 pyvisa
 pyvisa-py
 pyserial

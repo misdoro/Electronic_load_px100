@@ -1,6 +1,6 @@
-from PyQt5 import uic
-from PyQt5.QtCore import QSettings
-from PyQt5.QtWidgets import QGroupBox
+from PyQt6 import uic
+from PyQt6.QtCore import QSettings
+from PyQt6.QtWidgets import QGroupBox
 
 from instruments.instrument import Instrument
 

@@ -1,6 +1,6 @@
 from time import sleep
 
-from PyQt5.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QObject, QRunnable, pyqtSignal, pyqtSlot
 
 from instruments import Instruments
 

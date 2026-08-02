@@ -1,9 +1,9 @@
 from datetime import datetime
 from os import path
 
-from PyQt5 import uic
-from PyQt5.QtCore import QAbstractTableModel, QModelIndex, QSettings, Qt
-from PyQt5.QtWidgets import QGroupBox, QHeaderView
+from PyQt6 import uic
+from PyQt6.QtCore import QAbstractTableModel, QModelIndex, QSettings, Qt
+from PyQt6.QtWidgets import QGroupBox, QHeaderView
 from pandas import DataFrame
 import pandas as pd
 
@@ -51,7 +51,7 @@ class InternalRTableModel(QAbstractTableModel):
         self.endInsertRows()
 
     def data(self, index, role):
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             value = self._data.iloc[index.row(), index.column()]
             return str(value)
 
@@ -76,11 +76,11 @@ class InternalRTableModel(QAbstractTableModel):
         return self._data.shape[1]
 
     def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.Orientation.Horizontal:
                 return str(self._data.columns[section])
 
-            if orientation == Qt.Vertical:
+            if orientation == Qt.Orientation.Vertical:
                 return str(self._data.index[section])
 
 
@@ -92,7 +92,7 @@ class InternalR(QGroupBox):
         self.tableModel = InternalRTableModel()
         self.resultsTable.setModel(self.tableModel)
         self.resultsTable.horizontalHeader().setSectionResizeMode(
-            QHeaderView.Stretch)
+            QHeaderView.ResizeMode.Stretch)
         self.load_settings()
         self.reset()
 

@@ -1,8 +1,8 @@
 from os import path
 
-from PyQt5 import uic
-from PyQt5.QtCore import QSettings
-from PyQt5.QtWidgets import QGroupBox, QFileDialog
+from PyQt6 import uic
+from PyQt6.QtCore import QSettings
+from PyQt6.QtWidgets import QGroupBox, QFileDialog
 
 
 class LogControl(QGroupBox):
@@ -44,7 +44,7 @@ class LogControl(QGroupBox):
 
     def _select_path(self):
         dialog = self.dialog()
-        if dialog.exec_():
+        if dialog.exec():
             s_path = path.normpath(dialog.selectedFiles()[0])
             if path.isdir(s_path):
                 self._display_path(s_path)

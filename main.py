@@ -1,7 +1,7 @@
 from signal import signal, SIGTERM, SIGINT
 from sys import exit
 
-from PyQt5.QtCore import QCoreApplication, QThreadPool
+from PyQt6.QtCore import QCoreApplication, QThreadPool
 
 from data_store import DataStore
 from gui.gui import GUI

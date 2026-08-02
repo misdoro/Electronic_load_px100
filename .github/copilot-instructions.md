@@ -1,7 +1,7 @@
 # Copilot Instructions for Electronic_load_px100
 
 ## Project purpose
-- PyQt5 desktop app for controlling a PX-100 electronic load and running battery discharge tests.
+- PyQt6 desktop app for controlling a PX-100 electronic load and running battery discharge tests.
 - Core behavior: discover the instrument over PyVISA serial, stream measurements, update UI/plots, save CSV logs, and optionally send email reports.
 
 ## Main architecture
@@ -39,5 +39,5 @@
 
 ## Practical constraints
 - App is stateful and event-driven; avoid race-prone cross-thread UI access.
-- This project supports Python 3.14 and uses modern pandas (`>=2.2`) with the PyQt5/pyvisa/pyserial stack.
+- This project supports Python 3.14 and uses modern pandas (`>=2.2`) with the PyQt6/pyvisa/pyserial stack.
 - Device availability is not guaranteed during development; when adding logic, keep graceful handling for missing instruments.

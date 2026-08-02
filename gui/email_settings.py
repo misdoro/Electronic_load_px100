@@ -1,6 +1,6 @@
-from PyQt5 import uic
-from PyQt5.QtCore import QSettings
-from PyQt5.QtWidgets import QGroupBox, QMessageBox
+from PyQt6 import uic
+from PyQt6.QtCore import QSettings
+from PyQt6.QtWidgets import QGroupBox, QMessageBox
 import smtplib
 import os
 import tempfile

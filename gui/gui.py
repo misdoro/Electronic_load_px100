@@ -5,13 +5,13 @@ import tempfile
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, time
-from PyQt5.QtWidgets import QPushButton, QMessageBox
+from PyQt6.QtWidgets import QPushButton, QMessageBox
 
-matplotlib.use('Qt5Agg')
+matplotlib.use('QtAgg')
 
-from PyQt5 import QtWidgets, uic
+from PyQt6 import QtWidgets, uic
 
-from PyQt5.QtCore import (
+from PyQt6.QtCore import (
     QSettings,
     Qt,
     QSize,
@@ -19,11 +19,11 @@ from PyQt5.QtCore import (
     QTimer,
 )
 
-from PyQt5.QtWidgets import (
+from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
 
 from matplotlib.figure import Figure
 
@@ -526,4 +526,4 @@ class GUI:
         app = QtWidgets.QApplication(argv)
         self.window = MainWindow()
         self.window.set_backend(backend)
-        app.exec_()
+        app.exec()
