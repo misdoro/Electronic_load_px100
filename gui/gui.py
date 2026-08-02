@@ -1,7 +1,6 @@
 import matplotlib
 import smtplib
 import os
-import tempfile
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, time
@@ -319,9 +318,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 return
 
             # Save the current plot as an image with cell label
-            plot_filename = f"{cell_label}_plot.png"
-            fd, plot_file = tempfile.mkstemp(suffix=f'_{plot_filename}')
-            os.close(fd)
+            plot_filename = "{}_plot_{}.png".format(
+                cell_label, datetime.now().strftime("%Y%m%d_%H%M%S"))
+            plot_file = os.path.join(log_path, plot_filename)
             self.canvas.fig.savefig(plot_file, dpi=100)
             print(f"Plot saved to {plot_file}")
 
@@ -344,12 +343,6 @@ The test data files and plot are attached.
             if attachments:
                 print(f"Sending email with {len(attachments)} attachments")
                 self.send_email_notification(subject, message, attachments)
-
-                # Clean up the temporary file
-                try:
-                    os.remove(plot_file)
-                except Exception as e:
-                    print(f"Error removing temp file: {e}")
             else:
                 print("No attachments available, skipping email")
 
@@ -436,13 +429,16 @@ The test data files and plot are attached.
                     "Please configure email settings in the Settings tab before sending.")
                 return
 
-            # Create temporary files for attachments
+            # Create attachment files
             attachments = []
 
             # Save plot
-            plot_filename = f"{cell_label.replace(' ', '_')}_plot.png"
-            fd, plot_file = tempfile.mkstemp(suffix=f'_{plot_filename}')
-            os.close(fd)
+            cell_label_safe = cell_label.replace(' ', '_')
+            log_path = os.path.join(self.logControl.full_path, "logs")
+            os.makedirs(log_path, exist_ok=True)
+            plot_filename = "{}_plot_{}.png".format(
+                cell_label_safe, datetime.now().strftime("%Y%m%d_%H%M%S"))
+            plot_file = os.path.join(log_path, plot_filename)
             self.canvas.fig.savefig(plot_file, dpi=100)
             attachments.append(plot_file)
 
@@ -464,13 +460,6 @@ Test plot is attached.
 
             QMessageBox.information(self, "Success",
                 f"Test results email sent successfully to {recipient}!")
-
-            # Clean up temporary files
-            for file_path in attachments:
-                try:
-                    os.remove(file_path)
-                except:
-                    pass
 
         except Exception as e:
             QMessageBox.critical(self, "Error",
