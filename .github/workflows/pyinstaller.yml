@@ -1,9 +1,9 @@
-name: PyInstaller Windows
+name: Build installers
 
 on: push
 
 jobs:
-  build:
+  build-windows:
     name: Build windows installer
     runs-on: windows-latest
     strategy:
@@ -36,21 +36,56 @@ jobs:
     - name: Upload installer artifact
       uses: actions/upload-artifact@v7
       with:
-        name: installer${{matrix.python_arch}}
+        name: installer-windows-${{matrix.python_arch}}
         path: Battery-Tester*
+
+  build-macos:
+    name: Build macOS DMG
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+      - name: Build app bundle
+        run: |
+          pyinstaller --noconfirm --windowed --name "Battery Tester PX100" --hidden-import pyvisa_py --hidden-import serial main.py
+      - name: Build DMG
+        run: |
+          APP_NAME="Battery Tester PX100"
+          DMG_NAME="Battery-Tester-PX100-macos.dmg"
+          mkdir -p dist/dmg
+          cp -R "dist/${APP_NAME}.app" dist/dmg/
+          hdiutil create -volname "${APP_NAME}" -srcfolder dist/dmg -ov -format UDZO "dist/${DMG_NAME}"
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: installer-macos
+          path: dist/Battery-Tester-PX100-macos.dmg
+
   release:
     name: Prepare a release
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build-windows, build-macos]
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
       - name: Download installer artifacts
         uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          merge-multiple: true
       - name: List files
         run: |
-          ls -l
+          ls -l artifacts
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -67,6 +102,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: Battery-Tester-PX100-x64.exe
+          asset_path: artifacts/Battery-Tester-PX100-x64.exe
           asset_name: Battery-Tester-PX100-x64.exe
           asset_content_type: application/exe
+      - name: Upload macOS DMG
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/Battery-Tester-PX100-macos.dmg
+          asset_name: Battery-Tester-PX100-macos.dmg
+          asset_content_type: application/x-apple-diskimage

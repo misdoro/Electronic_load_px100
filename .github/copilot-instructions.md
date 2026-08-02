@@ -19,7 +19,7 @@
 - Install deps: `pip install --user -r requirements.txt`
 - Run app: `python3 main.py`
 - Windows packaging is defined in:
-  - `.github/workflows/pyinstaller_windows.yml`
+  - `workflows/pyinstaller.yml`
   - `px100.spec`
   - `px100.nsi`
 
